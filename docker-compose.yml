@@ -1,0 +1,71 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: xai-nids-backend
+    env_file:
+      - ./backend/.env
+    volumes:
+      - models_data:/app/models
+      - datasets_data:/app/datasets
+      - experiments_data:/app/data
+      # Mount xai-intrusion-detection-system/src as read-only ML core plugin library
+      - ../xai-intrusion-detection-system/src:/app/ml_core:ro
+    ports:
+      - "8000:8000"
+    environment:
+      - ML_CORE_PATH=/app/ml_core
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+    restart: unless-stopped
+    networks:
+      - xai-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: xai-nids-frontend
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - xai-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: xai-nids-nginx
+    ports:
+      - "3000:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - xai-net
+
+volumes:
+  models_data:
+  datasets_data:
+  experiments_data:
+
+networks:
+  xai-net:
+    driver: bridge

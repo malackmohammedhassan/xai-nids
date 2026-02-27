@@ -1,0 +1,63 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.hypothesis/
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+*.local
+
+# ── Data & Models ─────────────────────────────────────────────────────────────
+backend/datasets/
+backend/models/*.pkl
+backend/models/*.json
+backend/data/*.db
+*.csv
+*.parquet
+
+# ── Environment ───────────────────────────────────────────────────────────────
+.env
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+*.env.local
+*.env.production
+
+# ── Editor / OS ───────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+.docker/
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Testing artifacts ─────────────────────────────────────────────────────────
+test-results/
+playwright-report/
