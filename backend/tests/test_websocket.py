@@ -13,9 +13,9 @@ def test_websocket_connection_accepted(client):
 
 def test_websocket_receives_heartbeat(client):
     with client.websocket_connect("/api/v1/models/train/stream") as ws:
-        # The server sends heartbeat every 5s; use a short timeout
+        # The server sends heartbeat every 5s; receive_text() blocks until data arrives
         try:
-            data = ws.receive_text(timeout=7)
+            data = ws.receive_text()
             msg = json.loads(data)
             assert msg["event"] == "heartbeat"
             assert "timestamp" in msg["data"]

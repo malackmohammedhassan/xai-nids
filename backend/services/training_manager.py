@@ -55,6 +55,11 @@ class TrainingManager:
         self._lock = asyncio.Lock()
         self.state = JobState()
         self._ws_clients: Set[Any] = set()
+        self._main_loop: Optional[asyncio.AbstractEventLoop] = None
+
+    def set_event_loop(self, loop: asyncio.AbstractEventLoop) -> None:
+        """Called from async context to store the main event loop reference."""
+        self._main_loop = loop
 
     # ── Lock management ────────────────────────────────────────────────────────
 
@@ -96,33 +101,43 @@ class TrainingManager:
     ) -> None:
         self.state.current_step = step_name
         self.state.progress_pct = round((step_number / total_steps) * 100, 1)
-        asyncio.create_task(
-            self.broadcast({
-                "event": "step",
-                "data": {
-                    "step_name": step_name,
-                    "step_number": step_number,
-                    "total_steps": total_steps,
-                    "progress_pct": self.state.progress_pct,
-                },
-            })
-        )
+        self._safe_broadcast({
+            "event": "step",
+            "data": {
+                "step_name": step_name,
+                "step_number": step_number,
+                "total_steps": total_steps,
+                "progress_pct": self.state.progress_pct,
+            },
+        })
         if metrics:
-            asyncio.create_task(
-                self.broadcast({"event": "metrics", "data": metrics})
-            )
+            self._safe_broadcast({"event": "metrics", "data": metrics})
 
     def emit_log(self, level: str, message: str) -> None:
-        asyncio.create_task(
-            self.broadcast({
-                "event": "log",
-                "data": {
-                    "level": level,
-                    "message": message,
-                    "timestamp": time.strftime("%H:%M:%S"),
-                },
-            })
-        )
+        self._safe_broadcast({
+            "event": "log",
+            "data": {
+                "level": level,
+                "message": message,
+                "timestamp": time.strftime("%H:%M:%S"),
+            },
+        })
+
+    def _safe_broadcast(self, payload: dict) -> None:
+        """Broadcast from any thread — uses stored event loop if available."""
+        loop = self._main_loop
+        if loop is None:
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                return  # no loop available, skip broadcast
+        if loop.is_running():
+            asyncio.run_coroutine_threadsafe(self.broadcast(payload), loop)
+        else:
+            try:
+                asyncio.create_task(self.broadcast(payload))
+            except RuntimeError:
+                pass  # no running loop, skip
 
     # ── WebSocket management ──────────────────────────────────────────────────
 

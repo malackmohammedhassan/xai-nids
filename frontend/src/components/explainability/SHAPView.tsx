@@ -10,6 +10,10 @@ interface Props {
 export function SHAPView({ shap }: Props) {
   const [expanded, setExpanded] = useState(false);
 
+  if (!shap?.shap_values) {
+    return <div className="space-y-4"><p className="text-gray-500 text-sm">No SHAP explanation data available</p></div>;
+  }
+
   const isAttack = typeof shap.prediction === 'number'
     ? shap.prediction > 0.5
     : shap.prediction !== 'Normal' && shap.prediction !== '0';
@@ -46,7 +50,7 @@ export function SHAPView({ shap }: Props) {
               {isAttack ? 'Intrusion Detected' : 'Benign Traffic'}
             </p>
             <p className="text-gray-400 text-sm">
-              SHAP base value: {shap.base_value.toFixed(4)} · Prediction: {String(shap.prediction)}
+              SHAP base value: {shap.base_value != null ? shap.base_value.toFixed(4) : '—'} · Prediction: {String(shap.prediction)}
             </p>
           </div>
         </div>
@@ -82,7 +86,7 @@ export function SHAPView({ shap }: Props) {
           <span className="flex items-center gap-1"><span className="w-3 h-3 bg-emerald-400 rounded-sm inline-block" /> Pushes toward negative</span>
         </div>
 
-        <ResponsiveContainer width="100%" height={expanded ? shapData.length * 25 : 200}>
+        <ResponsiveContainer width="100%" height={expanded ? Math.max(60, shapData.length * 25) : 200}>
           <BarChart
             data={shapData}
             layout="vertical"
@@ -95,8 +99,8 @@ export function SHAPView({ shap }: Props) {
               formatter={(v: number, _n: string, p) => [v.toFixed(4), p.payload.fullName]}
             />
             <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-              {shapData.map((entry, i) => (
-                <Cell key={i} fill={entry.fill} />
+              {shapData.map((entry) => (
+                <Cell key={entry.fullName} fill={entry.fill} />
               ))}
             </Bar>
           </BarChart>

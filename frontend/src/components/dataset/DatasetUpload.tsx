@@ -6,7 +6,7 @@ import { validateDatasetFile } from '@/utils/validators';
 import { formatBytes } from '@/utils/formatters';
 
 interface Props {
-  onUpload: (file: File) => Promise<void>;
+  onUpload: (file: File) => Promise<unknown>;
   uploading?: boolean;
   uploadProgress?: number;
 }

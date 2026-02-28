@@ -12,6 +12,9 @@ interface MetricCard {
 }
 
 export function MetricsCards({ metrics }: Props) {
+  if (!metrics) {
+    return <div className="text-gray-500 text-sm">No metrics available</div>;
+  }
   const cards: MetricCard[] = [
     { label: 'Accuracy', value: metrics.accuracy, description: 'Overall correct predictions' },
     { label: 'Precision', value: metrics.precision, description: 'TP / (TP + FP)' },

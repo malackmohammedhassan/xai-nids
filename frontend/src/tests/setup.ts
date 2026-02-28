@@ -27,6 +27,22 @@ Object.defineProperty(global, 'WebSocket', {
   value: MockWebSocket,
 });
 
+// ResizeObserver mock (jsdom does not implement it)
+class MockResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+Object.defineProperty(global, 'ResizeObserver', {
+  writable: true,
+  value: MockResizeObserver,
+});
+
+// scrollIntoView mock (jsdom does not implement it)
+if (typeof window !== 'undefined' && !window.HTMLElement.prototype.scrollIntoView) {
+  window.HTMLElement.prototype.scrollIntoView = function () {};
+}
+
 // Suppress console errors in tests
 const originalError = console.error;
 beforeAll(() => {

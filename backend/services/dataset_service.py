@@ -120,7 +120,7 @@ def upload_dataset(file_bytes: bytes, filename: str) -> dict:
         "ext": ext,
     }
     _meta_path(dataset_id).write_text(json.dumps(meta, indent=2), encoding="utf-8")
-    logger.info("Dataset uploaded", extra={"dataset_id": dataset_id, "filename": filename})
+    logger.info("Dataset uploaded", extra={"dataset_id": dataset_id, "file_name": filename})
     return meta
 
 

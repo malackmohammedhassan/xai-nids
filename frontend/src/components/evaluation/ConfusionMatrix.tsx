@@ -15,8 +15,11 @@ function cellColor(value: number, rowMax: number): string {
 }
 
 export function ConfusionMatrix({ matrix, classNames }: Props) {
+  if (!matrix || matrix.length === 0) {
+    return <div className="bg-gray-800 rounded-xl p-5 text-gray-500 text-sm">No confusion matrix data available</div>;
+  }
   const labels = classNames ?? matrix.map((_, i) => `Class ${i}`);
-  const rowMaxes = matrix.map((row) => Math.max(...row));
+  const rowMaxes = matrix.map((row) => (row.length ? Math.max(...row) : 0));
 
   return (
     <div className="bg-gray-800 rounded-xl p-5 overflow-x-auto">
@@ -45,7 +48,7 @@ export function ConfusionMatrix({ matrix, classNames }: Props) {
             </div>
             {row.map((cell, j) => (
               <div
-                key={j}
+                key={`${i}-${j}`}
                 className={clsx(
                   'w-16 h-10 flex items-center justify-center text-sm font-semibold rounded-md mr-0.5',
                   cellColor(cell, rowMaxes[i])

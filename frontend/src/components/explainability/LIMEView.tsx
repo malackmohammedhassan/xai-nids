@@ -1,4 +1,3 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import type { LIMEResult } from '@/types';
 
 interface Props {
@@ -6,6 +5,9 @@ interface Props {
 }
 
 export function LIMEView({ lime }: Props) {
+  if (!lime?.feature_weights || !lime?.prediction_proba?.length) {
+    return <div className="space-y-4"><p className="text-gray-500 text-sm">No LIME explanation data available</p></div>;
+  }
   // Split positive vs negative weights
   const weights = Object.entries(lime.feature_weights).map(([feature, weight]) => ({
     feature: feature.length > 20 ? feature.slice(0, 18) + '…' : feature,

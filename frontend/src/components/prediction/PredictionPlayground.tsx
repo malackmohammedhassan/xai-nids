@@ -40,10 +40,11 @@ export function PredictionPlayground({ featureNames, onPredict, result, loading 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {featureNames.map((feature) => (
           <div key={feature}>
-            <label className="text-gray-400 text-xs block mb-1 truncate" title={feature}>
+            <label htmlFor={`feat-${feature}`} className="text-gray-400 text-xs block mb-1 truncate" title={feature}>
               {feature}
             </label>
             <input
+              id={`feat-${feature}`}
               type="text"
               value={values[feature] ?? '0'}
               onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange(feature, e.target.value)}

@@ -70,7 +70,10 @@ def run_explanation(
         else:
             row_df[col] = 0
 
-    row_scaled = pd.DataFrame(scaler.transform(row_df), columns=row_df.columns)
+    if scaler is not None:
+        row_scaled = pd.DataFrame(scaler.transform(row_df), columns=row_df.columns)
+    else:
+        row_scaled = row_df.copy()
     if selector is not None:
         input_processed = row_scaled[feature_names]
     else:

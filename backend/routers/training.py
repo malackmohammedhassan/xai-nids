@@ -53,6 +53,9 @@ async def start_training(req: TrainRequest):
     manager = get_training_manager()
     task_id = await manager.acquire_lock()  # raises 409 if already running
 
+    # Store current event loop so background thread can broadcast via WebSocket
+    manager.set_event_loop(asyncio.get_event_loop())
+
     # Launch background task
     from services.ml_service import run_training_job
     asyncio.create_task(
@@ -114,14 +117,22 @@ async def training_stream(ws: WebSocket):
     manager = get_training_manager()
     manager.register_ws(ws)
 
-    # Send heartbeat every 5 seconds until disconnect
+    # Send heartbeat every 5 seconds; exit immediately on disconnect
     try:
         while True:
-            await asyncio.sleep(5)
             try:
-                await ws.send_text(json.dumps({"event": "heartbeat", "data": {"timestamp": time.time()}}))
-            except Exception:
-                break
+                # Await any incoming client message (incl. close frames) with 5s window
+                msg = await asyncio.wait_for(ws.receive(), timeout=5.0)
+                if msg.get("type") == "websocket.disconnect":
+                    break
+            except asyncio.TimeoutError:
+                # No message from client — send heartbeat, then loop
+                try:
+                    await ws.send_text(
+                        json.dumps({"event": "heartbeat", "data": {"timestamp": time.time()}})
+                    )
+                except Exception:
+                    break
     except WebSocketDisconnect:
         pass
     finally:

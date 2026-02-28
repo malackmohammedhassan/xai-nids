@@ -16,6 +16,9 @@ interface Props {
 }
 
 export function ROCCurve({ fpr, tpr, auc }: Props) {
+  if (!fpr?.length || !tpr?.length || fpr.length !== tpr.length) {
+    return <div className="bg-gray-800 rounded-xl p-5 text-gray-500 text-sm">No ROC curve data available</div>;
+  }
   const data = fpr.map((x, i) => ({ fpr: +x.toFixed(3), tpr: +tpr[i].toFixed(3) }));
   const { grade, color } = auc !== undefined ? metricGrade(auc) : { grade: '?', color: 'text-gray-400' };
 
@@ -34,7 +37,7 @@ export function ROCCurve({ fpr, tpr, auc }: Props) {
       <ResponsiveContainer width="100%" height={220}>
         <AreaChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
           <defs>
-            <linearGradient id="rocGradient" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={`rocGradient-${auc ?? 0}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.3} />
               <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
             </linearGradient>
@@ -65,7 +68,7 @@ export function ROCCurve({ fpr, tpr, auc }: Props) {
             dataKey="tpr"
             stroke="#22d3ee"
             strokeWidth={2}
-            fill="url(#rocGradient)"
+            fill={`url(#rocGradient-${auc ?? 0})`}
             dot={false}
           />
         </AreaChart>

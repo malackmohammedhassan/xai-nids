@@ -85,7 +85,7 @@ async def xai_exception_handler(request: Request, exc: XAINIDSException) -> JSON
         "Handled exception",
         extra={
             "error_code": exc.error_code,
-            "message": exc.message,
+            "error_message": exc.message,
             "path": request.url.path,
             **exc.detail,
         },

@@ -75,7 +75,9 @@ def _blocking_train(
     loop = asyncio.new_event_loop()
 
     def emit(payload: dict) -> None:
-        asyncio.run_coroutine_threadsafe(manager.broadcast(payload), asyncio.get_event_loop()).result(timeout=5)
+        main_loop = manager._main_loop
+        if main_loop and main_loop.is_running():
+            asyncio.run_coroutine_threadsafe(manager.broadcast(payload), main_loop)
 
     try:
         loop.run_until_complete(

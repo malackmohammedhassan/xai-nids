@@ -9,7 +9,7 @@ describe('PredictionPlayground', () => {
   it('renders all feature inputs', () => {
     render(<PredictionPlayground featureNames={FEATURES} onPredict={vi.fn()} />);
     FEATURES.forEach((f) => {
-      expect(screen.getByLabelText(f) ?? screen.getByTitle(f) ?? screen.getByDisplayValue('0')).toBeInTheDocument();
+      expect(screen.getByLabelText(f)).toBeInTheDocument();
     });
     expect(screen.getByRole('button', { name: /run prediction/i })).toBeInTheDocument();
   });

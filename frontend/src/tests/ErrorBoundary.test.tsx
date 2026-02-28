@@ -1,9 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
-function Explosion() {
+function Explosion(): React.ReactElement {
   throw new Error('Test explosion');
 }
 

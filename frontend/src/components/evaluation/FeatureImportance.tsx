@@ -18,6 +18,9 @@ function tierColor(rank: number): string {
 }
 
 export function FeatureImportance({ features, maxDisplay = 20 }: Props) {
+  if (!features || features.length === 0) {
+    return <div className="bg-gray-800 rounded-xl p-5 text-gray-500 text-sm">No feature importance data available</div>;
+  }
   const sorted = [...features]
     .sort((a, b) => b.importance - a.importance)
     .slice(0, maxDisplay)

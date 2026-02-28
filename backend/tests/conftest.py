@@ -5,25 +5,29 @@ from __future__ import annotations
 
 import io
 import os
+import tempfile
 
 import numpy as np
 import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
 
+_TMP = tempfile.gettempdir()
+
 # Point at the new main.py
-os.environ.setdefault("DATASET_UPLOAD_DIR", "/tmp/xai_test_datasets")
-os.environ.setdefault("MODEL_SAVE_DIR", "/tmp/xai_test_models")
-os.environ.setdefault("EXPERIMENT_DB_PATH", "/tmp/xai_test_experiments.db")
+os.environ.setdefault("DATASET_UPLOAD_DIR", os.path.join(_TMP, "xai_test_datasets"))
+os.environ.setdefault("MODEL_SAVE_DIR", os.path.join(_TMP, "xai_test_models"))
+os.environ.setdefault("EXPERIMENT_DB_PATH", os.path.join(_TMP, "xai_test_experiments.db"))
 os.environ.setdefault("CORS_ORIGINS", '["http://localhost:5173"]')
 os.environ.setdefault("LOG_LEVEL", "WARNING")
 os.environ.setdefault("PLUGIN_DIR", "./plugins")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def client():
     from main import app
-    return TestClient(app)
+    with TestClient(app) as c:
+        yield c
 
 
 def _make_csv(n_rows: int = 100, n_features: int = 5, add_nulls: bool = False) -> bytes:

@@ -1,12 +1,28 @@
 """Model list, metrics, load, delete endpoints."""
 from __future__ import annotations
 
+import math
+from typing import Any
+
 from fastapi import APIRouter
 
 from schemas.metrics import LoadModelResponse, DeleteModelResponse
 from services import model_registry
 
 router = APIRouter()
+
+
+def _sanitize(obj: Any) -> Any:
+    """Recursively replace NaN/Inf floats with None so JSON serialization won't fail."""
+    if isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    if isinstance(obj, dict):
+        return {k: _sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_sanitize(v) for v in obj]
+    return obj
 
 
 @router.get("/models/list")
@@ -42,7 +58,7 @@ async def get_metrics(model_id: str):
     feat_imp = full_metrics.get("feature_importance", [])
     roc_curve = full_metrics.get("roc_curve")
 
-    return {
+    return _sanitize({
         "model_id": model_id,
         "accuracy": metrics.get("accuracy"),
         "f1_score": metrics.get("f1_score"),
@@ -54,7 +70,7 @@ async def get_metrics(model_id: str):
         "classification_report": full_metrics.get("classification_report"),
         "feature_importance": feat_imp,
         "class_names": bundle.get("class_names", []),
-    }
+    })
 
 
 @router.post("/models/{model_id}/load", response_model=LoadModelResponse)

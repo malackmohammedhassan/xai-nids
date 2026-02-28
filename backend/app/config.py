@@ -34,5 +34,5 @@ MULTICLASS_LABEL_MAP = {
 OPTUNA_TRIALS = int(os.getenv("OPTUNA_TRIALS", "30"))
 SHAP_SAMPLE_SIZE = int(os.getenv("SHAP_SAMPLE_SIZE", "500"))
 LIME_NUM_FEATURES = int(os.getenv("LIME_NUM_FEATURES", "10"))
-RANDOM_STATE = 42
-TEST_SIZE = 0.2
+RANDOM_STATE = int(os.getenv("RANDOM_STATE", "42"))
+TEST_SIZE = float(os.getenv("TEST_SIZE", "0.2"))
