@@ -135,29 +135,43 @@ export interface PredictionResult {
 export type ExplanationMethod = 'shap' | 'lime' | 'both';
 
 export interface ExplainRequest {
-  features: Record<string, unknown>;
+  input_row: Record<string, unknown>;
   method: ExplanationMethod;
-  num_samples?: number;
+  max_display_features?: number;
 }
 
 export interface SHAPResult {
+  // Normalised fields (set by backend adapter)
   shap_values: Record<string, number>;
   base_value: number;
   prediction: number | string;
   waterfall_chart_b64?: string;
   summary_chart_b64?: string;
+  // Raw fields also present
+  values?: Array<{ feature: string; value: number; shap_value: number }>;
+  expected_value?: number;
+  force_plot_base64?: string;
+  summary_plot_base64?: string;
+  sampled_for_performance?: boolean;
 }
 
 export interface LIMEResult {
+  // Normalised fields
   feature_weights: Record<string, number>;
   intercept: number;
   prediction_proba: number[];
   explanation_chart_b64?: string;
+  // Raw fields also present
+  explanation?: Array<{ feature_condition: string; weight: number }>;
+  prediction_probabilities?: Record<string, number>;
+  local_fidelity?: number;
+  plot_base64?: string;
 }
 
 export interface ExplanationResult {
   model_id: string;
   method: ExplanationMethod;
+  method_used: string;   // backend also sends this alias
   shap?: SHAPResult;
   lime?: LIMEResult;
   computation_time_ms: number;
@@ -184,12 +198,21 @@ export interface HealthStatus {
   status: 'ok' | 'degraded' | 'error';
   version: string;
   uptime_seconds: number;
+  backend_ready?: boolean;
+  // Directory / DB presence checks
   dataset_dir_exists: boolean;
   model_dir_exists: boolean;
   experiment_db_exists: boolean;
+  // Plugin / model info
   plugins_loaded: string[];
   loaded_models: string[];
   active_training: boolean;
+  // Legacy fields still present in backend response
+  model_loaded?: boolean;
+  active_training_job?: string | null;
+  loaded_plugin?: string;
+  available_plugins?: Array<{ name: string; version: string; supported_models: string[] }>;
+  total_models?: number;
 }
 
 // ─── Plugin Types ─────────────────────────────────────────────────────────────

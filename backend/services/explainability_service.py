@@ -87,6 +87,8 @@ def run_explanation(
         np.zeros((n_bg, len(feature_names))), columns=feature_names
     )
 
+    import time as _time
+    t0 = _time.perf_counter()
     result: dict = {"method_used": method}
     sampled = False
 
@@ -108,6 +110,33 @@ def run_explanation(
 
     if "shap" in result:
         result["shap"]["sampled_for_performance"] = sampled
+
+    # Normalise to match frontend ExplanationResult type
+    result["method"] = method          # alias of method_used
+    result["model_id"] = model_id
+    result["computation_time_ms"] = round((_time.perf_counter() - t0) * 1000, 2)
+
+    # Reshape shap to match frontend SHAPResult type
+    if "shap" in result:
+        s = result["shap"]
+        shap_values_dict = {v["feature"]: v["shap_value"] for v in s.get("values", [])}
+        prediction_val = model.predict(input_processed)[0]
+        s["shap_values"] = shap_values_dict
+        s["base_value"] = s.get("expected_value", 0.0)
+        s["prediction"] = str(prediction_val)
+        s["waterfall_chart_b64"] = s.get("force_plot_base64", "").replace("data:image/png;base64,", "")
+        s["summary_chart_b64"] = s.get("summary_plot_base64", "").replace("data:image/png;base64,", "")
+
+    # Reshape lime to match frontend LIMEResult type
+    if "lime" in result:
+        lm = result["lime"]
+        # Convert explanation list to feature_weights dict
+        lm["feature_weights"] = {item["feature_condition"]: item["weight"] for item in lm.get("explanation", [])}
+        # Convert prediction_probabilities dict to prediction_proba list (class order)
+        pp = lm.get("prediction_probabilities", {})
+        lm["prediction_proba"] = list(pp.values())
+        lm["intercept"] = lm.get("local_fidelity", 0.0)
+        lm["explanation_chart_b64"] = lm.get("plot_base64", "").replace("data:image/png;base64,", "")
 
     return result
 

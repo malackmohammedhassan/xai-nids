@@ -43,9 +43,8 @@ export default function ExplainabilityPage() {
         Object.entries(featureValues).map(([k, v]) => [k, isNaN(Number(v)) ? v : Number(v)])
       );
       const r = await explainabilityApi.explain(selectedModelId, {
-        features: parsed,
+        input_row: parsed,
         method,
-        num_samples: 100,
       });
       setResult(r);
     } finally {

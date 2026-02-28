@@ -13,6 +13,8 @@ _start_time = time.time()
 
 @router.get("/health")
 async def health() -> dict:
+    import os
+    from pathlib import Path
     from core.config import get_settings
     from plugins import list_plugins
     from services.model_registry import list_models
@@ -24,8 +26,12 @@ async def health() -> dict:
     plugins = list_plugins()
     loaded_plugin = plugins[0]["name"] if plugins else "none"
     has_loaded_model = any(m["is_loaded"] for m in models)
+    loaded_model_ids = [m["model_id"] for m in models if m["is_loaded"]]
+    plugins_loaded = [p["name"] for p in plugins]
+    is_training = manager.state.task_id is not None and manager.state.status in ("RUNNING", "PENDING")
 
     return {
+        # Legacy fields (keep for backwards compat)
         "status": "ok",
         "version": settings.app_version,
         "backend_ready": True,
@@ -36,4 +42,11 @@ async def health() -> dict:
         "loaded_plugin": loaded_plugin,
         "available_plugins": plugins,
         "total_models": len(models),
+        # Fields required by frontend HealthStatus type
+        "dataset_dir_exists": Path(settings.dataset_upload_dir).exists(),
+        "model_dir_exists": Path(settings.model_save_dir).exists(),
+        "experiment_db_exists": Path(settings.experiment_db_path).exists(),
+        "plugins_loaded": plugins_loaded,
+        "loaded_models": loaded_model_ids,
+        "active_training": is_training,
     }
