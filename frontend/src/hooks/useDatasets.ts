@@ -32,10 +32,14 @@ export function useDatasets() {
   const upload = useCallback(
     async (file: File): Promise<DatasetSummary> => {
       setUploadProgress(0);
-      const summary = await datasetsApi.upload(file, setUploadProgress);
-      setActiveSummary(summary);
-      setSelectedDatasetId(summary.dataset_id);
+      // Upload returns UploadResponse (columns = integer), not DatasetSummary
+      const uploadResult = await datasetsApi.upload(file, setUploadProgress);
+      const datasetId = uploadResult.dataset_id;
+      setSelectedDatasetId(datasetId);
       await fetchList();
+      // Now fetch the real summary which has columns: ColumnStats[]
+      const summary = await datasetsApi.summary(datasetId);
+      setActiveSummary(summary);
       return summary;
     },
     [fetchList, setActiveSummary, setSelectedDatasetId]

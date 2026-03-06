@@ -1,6 +1,6 @@
 # XAI-NIDS — Explainable AI Network Intrusion Detection System
 
-A production-ready, SOC-style web platform for training, evaluating, and explaining ML-based network intrusion detection models using **SHAP** and **LIME**.
+A locally deployable, visualization-first, explainable ML intelligence platform with bounded telemetry, statistical drift detection, persistent background job orchestration, and reproducible containerized deployment.
 
 ---
 
@@ -28,6 +28,8 @@ A production-ready, SOC-style web platform for training, evaluating, and explain
 | Frontend | React 18 + Vite + TailwindCSS + Recharts  |
 | Proxy    | NGINX reverse proxy                       |
 | Deploy   | Docker + docker-compose                   |
+
+For a detailed account of every architectural decision, the engineering tradeoffs made, and the hardening measures applied, see the **[Architectural Whitepaper](docs/ARCHITECTURE_WHITEPAPER.md)**.
 
 ---
 

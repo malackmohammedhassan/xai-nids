@@ -8,23 +8,37 @@ import {
   Lightbulb,
   Target,
   FlaskConical,
+  ShieldCheck,
   ChevronLeft,
   ChevronRight,
+  CheckCircle2,
 } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 
-const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { to: '/dataset', label: 'Dataset', icon: Database },
-  { to: '/training', label: 'Training', icon: BrainCircuit },
-  { to: '/evaluation', label: 'Evaluation', icon: BarChart3 },
-  { to: '/explainability', label: 'Explainability', icon: Lightbulb },
-  { to: '/prediction', label: 'Prediction', icon: Target },
-  { to: '/experiments', label: 'Experiments', icon: FlaskConical },
+type NavItem = {
+  to: string;
+  label: string;
+  icon: React.ElementType;
+  exact?: boolean;
+  step?: number;
+  /** derive completion from store slice */
+  completed?: (s: { datasetsLen: number; modelsLen: number }) => boolean;
+};
+
+const NAV_ITEMS: NavItem[] = [
+  { to: '/',              label: 'Dashboard',      icon: LayoutDashboard, exact: true },
+  { to: '/dataset',       label: 'Dataset',        icon: Database,       step: 1, completed: (s) => s.datasetsLen > 0 },
+  { to: '/training',      label: 'Training',       icon: BrainCircuit,   step: 2, completed: (s) => s.modelsLen > 0 },
+  { to: '/evaluation',    label: 'Evaluation',     icon: BarChart3,      step: 3 },
+  { to: '/explainability',label: 'Explainability', icon: Lightbulb,      step: 4 },
+  { to: '/prediction',    label: 'Prediction',     icon: Target,         step: 5 },
+  { to: '/experiments',   label: 'Experiments',    icon: FlaskConical },
+  { to: '/validation',    label: 'Validation',     icon: ShieldCheck },
 ];
 
 export function Sidebar() {
-  const { sidebarCollapsed, toggleSidebar } = useAppStore();
+  const { sidebarCollapsed, toggleSidebar, datasets, models } = useAppStore();
+  const storeSnap = { datasetsLen: datasets.length, modelsLen: models.length };
 
   return (
     <aside
@@ -53,26 +67,61 @@ export function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-3 space-y-1 px-2 overflow-hidden">
-        {NAV_ITEMS.map(({ to, label, icon: Icon, exact }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={exact}
-            className={({ isActive }) =>
-              clsx(
-                'flex items-center gap-3 px-2 py-2 rounded-md text-sm transition-colors',
-                isActive
-                  ? 'bg-cyan-500/20 text-cyan-400 font-medium'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
-              )
-            }
-            title={sidebarCollapsed ? label : undefined}
-          >
-            <Icon size={18} className="shrink-0" />
-            {!sidebarCollapsed && <span className="truncate">{label}</span>}
-          </NavLink>
-        ))}
+      <nav className="flex-1 py-3 space-y-0.5 px-2 overflow-hidden">
+        {/* Divider label for pipeline steps */}
+        {!sidebarCollapsed && (
+          <p className="px-2 pt-1 pb-1.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            Pipeline
+          </p>
+        )}
+
+        {NAV_ITEMS.map(({ to, label, icon: Icon, exact, step, completed: completedFn }) => {
+          const done = completedFn ? completedFn(storeSnap) : false;
+          return (
+            <NavLink
+              key={to}
+              to={to}
+              end={exact}
+              className={({ isActive }) =>
+                clsx(
+                  'flex items-center gap-3 px-2 py-2 rounded-md text-sm transition-colors',
+                  isActive
+                    ? 'bg-cyan-500/20 text-cyan-400 font-medium'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                )
+              }
+              title={sidebarCollapsed ? label : undefined}
+            >
+              {/* Icon or step number */}
+              <div className="relative shrink-0">
+                <Icon size={18} />
+                {/* Completion dot */}
+                {done && (
+                  <CheckCircle2
+                    size={9}
+                    className="absolute -bottom-0.5 -right-0.5 text-emerald-400 bg-gray-900 rounded-full"
+                  />
+                )}
+              </div>
+
+              {!sidebarCollapsed && (
+                <>
+                  <span className="truncate flex-1">{label}</span>
+                  {step && (
+                    <span
+                      className={clsx(
+                        'text-xs font-bold shrink-0',
+                        done ? 'text-emerald-500' : 'text-gray-700'
+                      )}
+                    >
+                      {done ? '✓' : step}
+                    </span>
+                  )}
+                </>
+              )}
+            </NavLink>
+          );
+        })}
       </nav>
 
       {/* Version */}

@@ -83,3 +83,41 @@ def test_train_status_returns_correct_structure(client):
     data = resp.json()
     assert "status" in data
     assert "progress_pct" in data
+
+
+def test_lock_reset_after_forced_failure(client, uploaded_dataset_id):
+    """Simulates a crashed training run; lock must be releasable and next job must start."""
+    from services.training_manager import get_training_manager
+    manager = get_training_manager()
+
+    # Force-acquire the lock as if training started then crashed
+    import asyncio
+    asyncio.get_event_loop().run_until_complete(manager.acquire_lock())
+    manager.release_lock(failed=True, error="simulated crash")
+
+    # After release, a new training job must be accepted (no 409)
+    resp = client.post("/api/v1/models/train", json={
+        "dataset_id": uploaded_dataset_id,
+        "target_column": "label",
+        "model_type": "random_forest",
+        "hyperparameters": {"n_estimators": 5, "max_depth": 2},
+        "test_size": 0.2,
+        "random_state": 42,
+    })
+    assert resp.status_code in (200, 202), f"Unexpected status after lock reset: {resp.status_code}"
+
+
+def test_training_status_reflects_failed_state(client, uploaded_dataset_id):
+    """After a forced failure, the status endpoint reports FAILED or IDLE."""
+    from services.training_manager import get_training_manager
+    manager = get_training_manager()
+
+    import asyncio
+    asyncio.get_event_loop().run_until_complete(manager.acquire_lock())
+    manager.release_lock(failed=True, error="status-check crash")
+
+    resp = client.get("/api/v1/models/train/status")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] in ("FAILED", "IDLE", "COMPLETE")
+

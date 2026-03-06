@@ -1,0 +1,167 @@
+{
+  "viz_type": "mutual_info",
+  "dataset_id": "209d1325-678d-4dca-8388-a1b468c5e749",
+  "target_column": "0.18",
+  "data": [
+    {
+      "feature": "31",
+      "mi_score": 0.2246
+    },
+    {
+      "feature": "29",
+      "mi_score": 0.2013
+    },
+    {
+      "feature": "0.2",
+      "mi_score": 0.1421
+    },
+    {
+      "feature": "0.3",
+      "mi_score": 0.1417
+    },
+    {
+      "feature": "0.14",
+      "mi_score": 0.1207
+    },
+    {
+      "feature": "132",
+      "mi_score": 0.115
+    },
+    {
+      "feature": "1.2",
+      "mi_score": 0.0973
+    },
+    {
+      "feature": "164",
+      "mi_score": 0.0945
+    },
+    {
+      "feature": "500473.9375",
+      "mi_score": 0.0883
+    },
+    {
+      "feature": "82",
+      "mi_score": 0.088
+    },
+    {
+      "feature": "1.1",
+      "mi_score": 0.0793
+    },
+    {
+      "feature": "621800.9375",
+      "mi_score": 0.0781
+    },
+    {
+      "feature": "0.013",
+      "mi_score": 0.0757
+    },
+    {
+      "feature": "0.001055",
+      "mi_score": 0.0746
+    },
+    {
+      "feature": "66",
+      "mi_score": 0.074
+    },
+    {
+      "feature": "2.1",
+      "mi_score": 0.0682
+    },
+    {
+      "feature": "0.10",
+      "mi_score": 0.0619
+    },
+    {
+      "feature": "0.12",
+      "mi_score": 0.0613
+    },
+    {
+      "feature": "0.11",
+      "mi_score": 0.0602
+    },
+    {
+      "feature": "1421927414.1",
+      "mi_score": 0.0547
+    },
+    {
+      "feature": "1421927414",
+      "mi_score": 0.0543
+    },
+    {
+      "feature": "0.017",
+      "mi_score": 0.0395
+    },
+    {
+      "feature": "2",
+      "mi_score": 0.0353
+    },
+    {
+      "feature": "0.8",
+      "mi_score": 0.0333
+    },
+    {
+      "feature": "1.3",
+      "mi_score": 0.0306
+    },
+    {
+      "feature": "0.9",
+      "mi_score": 0.0298
+    },
+    {
+      "feature": "0",
+      "mi_score": 0.0279
+    },
+    {
+      "feature": "0.1",
+      "mi_score": 0.026
+    },
+    {
+      "feature": "1",
+      "mi_score": 0.0244
+    },
+    {
+      "feature": "3.1",
+      "mi_score": 0.0161
+    },
+    {
+      "feature": "7",
+      "mi_score": 0.0152
+    },
+    {
+      "feature": "3",
+      "mi_score": 0.0115
+    },
+    {
+      "feature": "0.5",
+      "mi_score": 0.0094
+    },
+    {
+      "feature": "0.4",
+      "mi_score": 0.0093
+    },
+    {
+      "feature": "0.7",
+      "mi_score": 0.0054
+    },
+    {
+      "feature": "0.6",
+      "mi_score": 0.0034
+    },
+    {
+      "feature": "0.15",
+      "mi_score": 0.0016
+    },
+    {
+      "feature": "0.17",
+      "mi_score": 0.0011
+    },
+    {
+      "feature": "0.16",
+      "mi_score": 0.0008
+    },
+    {
+      "feature": "0.13",
+      "mi_score": 0.0004
+    }
+  ]
+}

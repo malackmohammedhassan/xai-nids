@@ -1,4 +1,4 @@
-"""GET /api/v1/health"""
+"""GET /api/v1/health  —  liveness + readiness probes."""
 from __future__ import annotations
 
 import platform
@@ -9,6 +9,12 @@ from fastapi import APIRouter
 
 router = APIRouter()
 _start_time = time.time()
+
+
+@router.get("/health/live")
+async def liveness() -> dict:
+    """Kubernetes-style liveness probe — only confirms the process is alive."""
+    return {"status": "healthy", "uptime": round(time.time() - _start_time, 1)}
 
 
 @router.get("/health")
@@ -31,12 +37,13 @@ async def health() -> dict:
     is_training = manager.state.task_id is not None and manager.state.status in ("RUNNING", "PENDING")
 
     return {
-        # Legacy fields (keep for backwards compat)
-        "status": "ok",
+        # Core fields — frontend and health-check framework expect these
+        "status": "healthy",
         "version": settings.app_version,
+        "uptime": round(time.time() - _start_time, 1),  # short alias used by liveness dashboards
         "backend_ready": True,
         "model_loaded": has_loaded_model,
-        "uptime_seconds": round(time.time() - _start_time, 1),
+        "uptime_seconds": round(time.time() - _start_time, 1),  # kept for backward compat
         "active_training_job": manager.state.task_id if manager.state.task_id else None,
         "python_version": sys.version,
         "loaded_plugin": loaded_plugin,

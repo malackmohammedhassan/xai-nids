@@ -1,8 +1,10 @@
 export { default as client } from './client';
 export { datasetsApi } from './datasets';
+export type { DatasetRowsResponse } from './datasets';
 export { trainingApi } from './training';
 export { modelsApi } from './models';
 export { predictionApi } from './prediction';
 export { explainabilityApi } from './explainability';
 export { experimentsApi } from './experiments';
 export { healthApi } from './health';
+export { validationApi } from './validation';

@@ -7,11 +7,12 @@ interface Props {
 }
 
 export function DatasetSummaryCard({ summary }: Props) {
-  const nullyColumns = summary.columns.filter((c) => c.null_pct > 0);
+  const safeColumns = Array.isArray(summary.columns) ? summary.columns : [];
+  const nullyColumns = safeColumns.filter((c) => c.null_pct > 0);
 
   // Health score: penalise for nulls
   const avgNullPct = nullyColumns.length
-    ? nullyColumns.reduce((acc, c) => acc + c.null_pct, 0) / summary.columns.length
+    ? nullyColumns.reduce((acc, c) => acc + c.null_pct, 0) / safeColumns.length
     : 0;
   const healthScore = Math.max(0, 1 - avgNullPct);
 

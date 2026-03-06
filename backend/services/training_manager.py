@@ -80,15 +80,42 @@ class TrainingManager:
         self.state.error_message = None
         return task_id
 
-    def release_lock(self, failed: bool = False, error: Optional[str] = None) -> None:
+    def release_lock(
+        self,
+        failed: bool = False,
+        error: Optional[str] = None,
+        model_id: Optional[str] = None,
+        run_id: Optional[str] = None,
+    ) -> None:
         if self._lock.locked():
             self._lock.release()
+        duration = round(time.time() - self.state.start_time, 2) if self.state.start_time else None
         if failed:
             self.state.status = TrainingStatus.FAILED
             self.state.error_message = error
+            logger.warning(
+                "Training job failed",
+                extra={"task_id": self.state.task_id, "error": error, "duration_seconds": duration},
+            )
         else:
             self.state.status = TrainingStatus.COMPLETE
             self.state.progress_pct = 100.0
+            logger.info(
+                "Training job completed",
+                extra={"task_id": self.state.task_id, "duration_seconds": duration},
+            )
+        self._safe_broadcast(
+            {
+                "event": "complete",
+                "data": {
+                    "task_id": self.state.task_id,
+                    "run_id": run_id,
+                    "model_id": model_id,
+                    "duration_seconds": duration,
+                    "failed": failed,
+                },
+            }
+        )
 
     # ── Progress updates ──────────────────────────────────────────────────────
 

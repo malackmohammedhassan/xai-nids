@@ -41,7 +41,10 @@ def evaluate_model(model, X_test, y_test, class_names=None):
         metrics["roc_auc"] = None
 
     cm = confusion_matrix(y_test, y_pred).tolist()
-    report = classification_report(y_test, y_pred, target_names=class_names, output_dict=True, zero_division=0)
+    # Only pass target_names when the number of unique classes matches the names list
+    _unique_classes = np.unique(np.concatenate([y_test, y_pred]))
+    _target_names = class_names if (class_names and len(_unique_classes) == len(class_names)) else None
+    report = classification_report(y_test, y_pred, labels=_unique_classes, target_names=_target_names, output_dict=True, zero_division=0)
 
     y_prob_all = None
     if hasattr(model, "predict_proba"):

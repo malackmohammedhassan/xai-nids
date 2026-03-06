@@ -49,6 +49,7 @@ def sample_csv_bytes():
 
 @pytest.fixture
 def sample_parquet_bytes():
+    pyarrow = pytest.importorskip("pyarrow", reason="pyarrow not installed")  # noqa: F841
     rng = np.random.default_rng(99)
     data = {f"feature_{i}": rng.random(100) for i in range(4)}
     data["label"] = rng.integers(0, 2, 100)

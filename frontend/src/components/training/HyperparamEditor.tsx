@@ -9,6 +9,7 @@ interface Props {
 }
 
 export function HyperparamEditor({ schema, values, onChange, useOptuna, onOptunaChange }: Props) {
+  const safeSchema = schema ?? {};
   return (
     <div className="space-y-4">
       {/* Optuna toggle */}
@@ -36,7 +37,7 @@ export function HyperparamEditor({ schema, values, onChange, useOptuna, onOptuna
           Manual Hyperparameters
         </p>
         <div className="space-y-3">
-          {Object.entries(schema).map(([key, param]) => (
+          {Object.entries(safeSchema).map(([key, param]) => (
             <div key={key} className="flex items-center gap-4">
               <label className="text-gray-300 text-sm w-48 shrink-0">
                 {key}

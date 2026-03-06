@@ -46,15 +46,34 @@ def list_models() -> list[dict]:
                 meta = json.loads(meta_p.read_text(encoding="utf-8"))
             except Exception:
                 pass
+
+        # Backfill feature_names from bundle if missing in meta (one-time migration)
+        if not meta.get("feature_names"):
+            try:
+                import pickle as _pickle
+                with open(pkl, "rb") as f:
+                    bundle = _pickle.load(f)
+                fn = bundle.get("feature_names", [])
+                if fn:
+                    meta["feature_names"] = list(fn)
+                    meta["feature_count"] = len(fn)
+                    if meta_p.exists():
+                        meta_p.write_text(json.dumps(meta, indent=2), encoding="utf-8")
+            except Exception:
+                pass
+
         result.append({
             "model_id": model_id,
             "model_type": meta.get("model_type", "unknown"),
             "run_id": meta.get("run_id", model_id),
             "created_at": meta.get("created_at", ""),
+            "dataset_id": meta.get("dataset_id"),
             "dataset_filename": meta.get("dataset_filename"),
+            "target_column": meta.get("target_column"),
             "accuracy": meta.get("accuracy"),
             "f1_score": meta.get("f1_score"),
             "hyperparameters": meta.get("hyperparameters"),
+            "feature_names": meta.get("feature_names", []),
             "feature_count": meta.get("feature_count"),
             "is_loaded": model_id in _loaded_models,
         })
@@ -93,6 +112,28 @@ def load_model(model_id: str) -> dict:
     _loaded_models[model_id] = bundle
     logger.info("Model loaded", extra={"model_id": model_id})
     return bundle
+
+
+def get_model_meta(model_id: str) -> dict:
+    """Return the metadata dict stored alongside the model pickle.
+
+    Raises ``ModelNotFoundError`` if neither the pickle nor the metadata
+    file exists for this ``model_id``.
+    """
+    pkl_p  = _pkl_path(model_id)
+    meta_p = _meta_path(model_id)
+
+    if not pkl_p.exists() and not meta_p.exists():
+        raise ModelNotFoundError(f"Model {model_id} not found", model_id=model_id)
+
+    if meta_p.exists():
+        try:
+            return json.loads(meta_p.read_text(encoding="utf-8"))
+        except Exception as exc:
+            logger.warning("Could not read meta for %s: %s", model_id, exc)
+
+    # Fallback: return a minimal dict so callers don't crash
+    return {"model_id": model_id}
 
 
 def get_loaded_model(model_id: str) -> Optional[dict]:

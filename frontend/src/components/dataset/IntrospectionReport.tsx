@@ -16,7 +16,7 @@ export function IntrospectionReport({ introspection: d }: Props) {
   const issues: string[] = [];
   if (d.class_imbalance_ratio !== undefined && d.class_imbalance_ratio > 5)
     issues.push(`Class imbalance ratio ${d.class_imbalance_ratio.toFixed(1)}x — SMOTE recommended`);
-  if (d.high_cardinality_features.length > 0)
+  if ((d.high_cardinality_features ?? []).length > 0)
     issues.push(`${d.high_cardinality_features.length} high-cardinality feature(s) — consider encoding`);
 
   return (
@@ -33,15 +33,15 @@ export function IntrospectionReport({ introspection: d }: Props) {
         </div>
         <div>
           <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Classes</p>
-          <p className="text-gray-200">{d.target_classes.slice(0, 6).join(', ')}{d.target_classes.length > 6 ? '…' : ''}</p>
+          <p className="text-gray-200">{(d.target_classes ?? []).slice(0, 6).join(', ')}{(d.target_classes ?? []).length > 6 ? '…' : ''}</p>
         </div>
         <div>
           <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Numeric Features</p>
-          <p className="text-gray-200">{d.numeric_features.length}</p>
+          <p className="text-gray-200">{(d.numeric_features ?? []).length}</p>
         </div>
         <div>
           <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Categorical Features</p>
-          <p className="text-gray-200">{d.categorical_features.length}</p>
+          <p className="text-gray-200">{(d.categorical_features ?? []).length}</p>
         </div>
       </div>
 

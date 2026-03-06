@@ -13,7 +13,8 @@ const COLORS = [
 
 export function FeatureDistribution({ columns, maxBars = 15 }: Props) {
   // Show top columns by null_pct descending for a "data quality" view
-  const data = [...columns]
+  const safeColumns = Array.isArray(columns) ? columns : [];
+  const data = [...safeColumns]
     .sort((a, b) => b.null_pct - a.null_pct)
     .slice(0, maxBars)
     .map((c, i) => ({

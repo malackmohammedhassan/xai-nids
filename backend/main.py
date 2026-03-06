@@ -12,6 +12,8 @@ from core.exceptions import XAINIDSException, xai_exception_handler, generic_exc
 from core.logger import get_logger
 from core.middleware import RequestTimingMiddleware
 from routers import health, datasets, training, models, prediction, explainability, experiments
+from routers import intelligence, visualizations, jobs as jobs_router, session as session_router
+from routers import system as system_router, validation as validation_router
 
 logger = get_logger("main")
 
@@ -56,13 +58,31 @@ def create_app() -> FastAPI:
     app.include_router(prediction.router, prefix=prefix, tags=["Prediction"])
     app.include_router(explainability.router, prefix=prefix, tags=["Explainability"])
     app.include_router(experiments.router, prefix=prefix, tags=["Experiments"])
+    app.include_router(validation_router.router, prefix=prefix, tags=["Validation"])
+
+    # ── v2 routes (intelligence, visualization, jobs, session) ────────────────
+    prefix_v2 = "/api/v2"
+    app.include_router(intelligence.router, prefix=prefix_v2, tags=["Intelligence"])
+    app.include_router(visualizations.router, prefix=prefix_v2, tags=["Visualizations"])
+    app.include_router(jobs_router.router, prefix=prefix_v2, tags=["Jobs"])
+    app.include_router(session_router.router, prefix=prefix_v2, tags=["Session"])
+    app.include_router(system_router.router, prefix=prefix_v2, tags=["System"])
 
     # ── Startup events ────────────────────────────────────────────────────────
     @app.on_event("startup")
     async def startup() -> None:
+        import asyncio
         from services.training_manager import get_training_manager
         get_training_manager().state.reset()
         logger.info("XAI-NIDS backend started", extra={"version": settings.app_version})
+        # Restore background jobs from disk
+        try:
+            from services.background_job_manager import get_job_manager
+            mgr = get_job_manager()
+            mgr.restore_from_disk()
+            mgr.set_event_loop(asyncio.get_event_loop())
+        except Exception as exc:
+            logger.warning("Job manager startup warning", extra={"error": str(exc)})
         # Warm-up plugin discovery at startup
         try:
             from plugins import list_plugins

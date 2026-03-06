@@ -1,47 +1,79 @@
-version: "3.8"
+﻿# XAI-NIDS — single-command stack
+#
+# Quick start (no config needed):
+#   docker compose up --build
+#
+# To customise env vars, copy the example files first:
+#   cp backend/.env.example backend/.env
+#   cp frontend/.env.example frontend/.env
+# Docker Compose will merge any .env file over the inline defaults below.
 
 services:
+
+  # ── Backend (FastAPI + ML) ────────────────────────────────────────────────
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: xai-nids-backend
-    env_file:
-      - ./backend/.env
+    # All required vars are set inline so the stack boots without a .env file.
+    # Create backend/.env from backend/.env.example to override any of these.
+    environment:
+      DATASET_UPLOAD_DIR: /app/datasets
+      MODEL_SAVE_DIR: /app/models
+      EXPERIMENT_DB_PATH: /app/data/experiments.db
+      MAX_DATASET_SIZE_MB: "200"
+      SHAP_MAX_ROWS: "5000"
+      OPTUNA_TRIALS: "30"
+      LIME_NUM_FEATURES: "10"
+      TEST_SIZE: "0.2"
+      RANDOM_STATE: "42"
+      CORS_ORIGINS: '["http://localhost:3000","http://localhost:80","http://localhost:5173"]'
+      LOG_LEVEL: WARNING
+      PLUGIN_DIR: /app/plugins
+      ML_CORE_PATH: /app/ml_core
+      APP_VERSION: "2.0.0"
+      DEFAULT_PLUGIN: xai_ids
     volumes:
       - models_data:/app/models
       - datasets_data:/app/datasets
       - experiments_data:/app/data
-      # Mount xai-intrusion-detection-system/src as read-only ML core plugin library
+      # Mount the companion ML library as read-only (optional — comment out if absent)
       - ../xai-intrusion-detection-system/src:/app/ml_core:ro
     ports:
       - "8000:8000"
-    environment:
-      - ML_CORE_PATH=/app/ml_core
+    # Memory / CPU caps — prevents a runaway training job from starving the host
+    mem_limit: 2g
+    cpus: "2.0"
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 45s
+      start_period: 90s    # generous: ML imports (numpy, shap) are slow on first boot
     restart: unless-stopped
     networks:
       - xai-net
 
+  # ── Frontend (React → nginx static) ──────────────────────────────────────
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      # VITE_API_URL is intentionally empty: the built bundle uses relative /api/
+      # paths so the nginx reverse proxy can route them to the backend.
     container_name: xai-nids-frontend
-    env_file:
-      - ./frontend/.env
     depends_on:
       backend:
         condition: service_healthy
+    mem_limit: 256m
+    cpus: "0.5"
     restart: unless-stopped
     networks:
       - xai-net
 
+  # ── Reverse proxy (nginx) ─────────────────────────────────────────────────
   nginx:
     image: nginx:alpine
     container_name: xai-nids-nginx
@@ -52,6 +84,8 @@ services:
     depends_on:
       - backend
       - frontend
+    mem_limit: 128m
+    cpus: "0.25"
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
       interval: 30s

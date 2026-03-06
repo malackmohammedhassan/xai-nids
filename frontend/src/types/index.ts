@@ -5,6 +5,7 @@ export interface ColumnStats {
   null_count: number;
   null_pct: number;
   unique_count: number;
+  sample_values?: (string | number | boolean)[];
   mean?: number;
   std?: number;
   min?: number;
@@ -23,6 +24,10 @@ export interface DatasetSummary {
   size_bytes: number;
   columns: ColumnStats[];
   uploaded_at: string;
+  sample_rows?: Record<string, unknown>[];
+  class_distribution?: Record<string, number>;
+  memory_usage_mb?: number;
+  suggested_target?: string;
 }
 
 export interface DatasetIntrospection {
@@ -35,6 +40,7 @@ export interface DatasetIntrospection {
   high_cardinality_features: string[];
   outlier_counts: Record<string, number>;
   class_imbalance_ratio?: number;
+  recommended_preprocessing?: string[];
 }
 
 export interface DatasetListItem {
@@ -69,6 +75,9 @@ export interface TrainingRequest {
   hyperparameters?: Record<string, unknown>;
   use_optuna?: boolean;
   plugin_name?: string;
+  test_size?: number;
+  random_state?: number;
+  pipeline_config?: import('@/types/pipeline').PipelineConfig | null;
 }
 
 export interface TrainingStatus {
@@ -81,27 +90,57 @@ export interface TrainingStatus {
 }
 
 export interface TrainingProgressEvent {
-  type: 'progress' | 'complete' | 'error' | 'heartbeat';
-  step?: string;
-  progress?: number;
-  total?: number;
-  model_id?: string;
-  error?: string;
-  timestamp: string;
+  /** matches the backend's `event` key (e.g. "step", "log", "complete", "heartbeat") */
+  event: 'step' | 'log' | 'started' | 'metrics' | 'complete' | 'error' | 'heartbeat';
+  data?: {
+    // step
+    step_name?: string;
+    step_number?: number;
+    total_steps?: number;
+    progress_pct?: number;
+    // log
+    level?: string;
+    message?: string;
+    // shared timestamp (number for heartbeat, string for log)
+    timestamp?: string | number;
+    // complete
+    task_id?: string;
+    run_id?: string;
+    model_id?: string;
+    final_metrics?: Record<string, unknown>;
+    duration_seconds?: number;
+    // started
+    model_type?: string;
+    dataset_id?: string;
+    // error
+    error_type?: string;
+    traceback_safe?: string;
+    // allow arbitrary metrics keys
+    [key: string]: unknown;
+  };
 }
 
 // ─── Model Types ──────────────────────────────────────────────────────────────
 export interface ModelMeta {
   model_id: string;
   model_type: string;
-  dataset_id: string;
-  target_column: string;
+  /** UUID run_id from the training job */
+  run_id?: string;
+  /** Set when the model was created from a stored dataset */
+  dataset_id?: string;
+  /** Original CSV filename used for training (e.g. "UNSW_NB15_1.csv") */
+  dataset_filename?: string;
+  target_column?: string;
   feature_names: string[];
   class_names?: string[];
   created_at: string;
-  plugin_name: string;
-  hyperparameters: Record<string, unknown>;
+  plugin_name?: string;
+  hyperparameters?: Record<string, unknown>;
   is_loaded: boolean;
+  /** Quick-access metrics stored at save time */
+  accuracy?: number;
+  f1_score?: number;
+  feature_count?: number;
 }
 
 export interface ModelMetrics {

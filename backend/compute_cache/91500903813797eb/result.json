@@ -1,0 +1,557 @@
+{
+  "viz_type": "violin",
+  "dataset_id": "c4c40d41-17f4-4d1e-8c14-54e0df0ac1e6",
+  "target_column": "attack_cat",
+  "data": [
+    {
+      "feature": "id",
+      "classes": [
+        {
+          "class": "Normal",
+          "count": 56000,
+          "mean": 33939.1993,
+          "median": 28000.5,
+          "q1": 14000.75,
+          "q3": 42000.25,
+          "min": 1.0,
+          "max": 115964.0
+        },
+        {
+          "class": "Backdoor",
+          "count": 1746,
+          "mean": 93415.512,
+          "median": 91026.5,
+          "q1": 69621.25,
+          "q3": 113610.75,
+          "min": 47912.0,
+          "max": 174021.0
+        },
+        {
+          "class": "Analysis",
+          "count": 2000,
+          "mean": 90862.18,
+          "median": 84843.5,
+          "q1": 63416.0,
+          "q3": 111432.75,
+          "min": 47933.0,
+          "max": 172533.0
+        },
+        {
+          "class": "Fuzzers",
+          "count": 18184,
+          "mean": 93789.171,
+          "median": 89446.0,
+          "q1": 64295.0,
+          "q3": 115875.75,
+          "min": 48018.0,
+          "max": 175002.0
+        },
+        {
+          "class": "Shellcode",
+          "count": 1133,
+          "mean": 95849.3883,
+          "median": 92649.0,
+          "q1": 68616.0,
+          "q3": 116372.0,
+          "min": 48814.0,
+          "max": 175338.0
+        }
+      ]
+    },
+    {
+      "feature": "dur",
+      "classes": [
+        {
+          "class": "Normal",
+          "count": 56000,
+          "mean": 1.0172,
+          "median": 0.0386,
+          "q1": 0.0017,
+          "q3": 0.6398,
+          "min": 0.0,
+          "max": 60.0
+        },
+        {
+          "class": "Backdoor",
+          "count": 1746,
+          "mean": 2.6588,
+          "median": 0.0,
+          "q1": 0.0,
+          "q3": 0.2329,
+          "min": 0.0,
+          "max": 59.8796
+        },
+        {
+          "class": "Analysis",
+          "count": 2000,
+          "mean": 1.8017,
+          "median": 0.0,
+          "q1": 0.0,
+          "q3": 0.6441,
+          "min": 0.0,
+          "max": 59.9324
+        },
+        {
+          "class": "Fuzzers",
+          "count": 18184,
+          "mean": 2.8585,
+          "median": 0.6174,
+          "q1": 0.0,
+          "q3": 1.1286,
+          "min": 0.0,
+          "max": 59.996
+        },
+        {
+          "class": "Shellcode",
+          "count": 1133,
+          "mean": 0.367,
+          "median": 0.0,
+          "q1": 0.0,
+          "q3": 0.4911,
+          "min": 0.0,
+          "max": 12.3406
+        }
+      ]
+    },
+    {
+      "feature": "spkts",
+      "classes": [
+        {
+          "class": "Normal",
+          "count": 56000,
+          "mean": 30.7255,
+          "median": 12.0,
+          "q1": 4.0,
+          "q3": 40.0,
+          "min": 1.0,
+          "max": 656.0
+        },
+        {
+          "class": "Backdoor",
+          "count": 1746,
+          "mean": 7.563,
+          "median": 2.0,
+          "q1": 2.0,
+          "q3": 4.0,
+          "min": 1.0,
+          "max": 250.0
+        },
+        {
+          "class": "Analysis",
+          "count": 2000,
+          "mean": 6.1125,
+          "median": 2.0,
+          "q1": 2.0,
+          "q3": 10.0,
+          "min": 1.0,
+          "max": 250.0
+        },
+        {
+          "class": "Fuzzers",
+          "count": 18184,
+          "mean": 14.422,
+          "median": 10.0,
+          "q1": 2.0,
+          "q3": 12.0,
+          "min": 1.0,
+          "max": 1638.0
+        },
+        {
+          "class": "Shellcode",
+          "count": 1133,
+          "mean": 5.9329,
+          "median": 2.0,
+          "q1": 2.0,
+          "q3": 10.0,
+          "min": 2.0,
+          "max": 10.0
+        }
+      ]
+    },
+    {
+      "feature": "dpkts",
+      "classes": [
+        {
+          "class": "Normal",
+          "count": 56000,
+          "mean": 38.0577,
+          "median": 10.0,
+          "q1": 2.0,
+          "q3": 40.0,
+          "min": 0.0,
+          "max": 1716.0
+        },
+        {
+          "class": "Backdoor",
+          "count": 1746,
+          "mean": 1.6667,
+          "median": 0.0,
+          "q1": 0.0,
+          "q3": 0.0,
+          "min": 0.0,
+          "max": 48.0
+        },
+        {
+          "class": "Analysis",
+          "count": 2000,
+          "mean": 2.594,
+          "median": 0.0,
+          "q1": 0.0,
+          "q3": 8.0,
+          "min": 0.0,
+          "max": 24.0
+        },
+        {
+          "class": "Fuzzers",
+          "count": 18184,
+          "mean": 6.1967,
+          "median": 6.0,
+          "q1": 0.0,
+          "q3": 8.0,
+          "min": 0.0,
+          "max": 436.0
+        },
+        {
+          "class": "Shellcode",
+          "count": 1133,
+          "mean": 3.2657,
+          "median": 0.0,
+          "q1": 0.0,
+          "q3": 6.0,
+          "min": 0.0,
+          "max": 8.0
+        }
+      ]
+    },
+    {
+      "feature": "sbytes",
+      "classes": [
+        {
+          "class": "Normal",
+          "count": 56000,
+          "mean": 4105.7029,
+          "median": 1470.0,
+          "q1": 424.0,
+          "q3": 3401.5,
+          "min": 28.0,
+          "max": 338718.0
+        },
+        {
+          "class": "Backdoor",
+          "count": 1746,
+          "mean": 1834.583,
+          "median": 200.0,
+          "q1": 200.0,
+          "q3": 364.0,
+          "min": 60.0,
+          "max": 248562.0
+        },
+        {
+          "class": "Analysis",
+          "count": 2000,
+          "mean": 1029.638,
+          "median": 200.0,
+          "q1": 200.0,
+          "q3": 810.0,
+          "min": 60.0,
+          "max": 248562.0
+        },
+        {
+          "class": "Fuzzers",
+          "count": 18184,
+          "mean": 7286.6963,
+          "median": 914.0,
+          "q1": 534.0,
+          "q3": 1542.0,
+          "min": 60.0,
+          "max": 2162963.0
+        },
+        {
+          "class": "Shellcode",
+          "count": 1133,
+          "mean": 529.744,
+          "median": 536.0,
+          "q1": 248.0,
+          "q3": 690.0,
+          "min": 102.0,
+          "max": 1862.0
+        }
+      ]
+    },
+    {
+      "feature": "dbytes",
+      "classes": [
+        {
+          "class": "Normal",
+          "count": 56000,
+          "mean": 31049.4631,
+          "median": 1112.0,
+          "q1": 178.0,
+          "q3": 10168.0,
+          "min": 0.0,
+          "max": 2249492.0
+        },
+        {
+          "class": "Backdoor",
+          "count": 1746,
+          "mean": 341.0962,
+          "median": 0.0,
+          "q1": 0.0,
+          "q3": 0.0,
+          "min": 0.0,
+          "max": 43634.0
+        },
+        {
+          "class": "Analysis",
+          "count": 2000,
+          "mean": 361.151,
+          "median": 0.0,
+          "q1": 0.0,
+          "q3": 1078.0,
+          "min": 0.0,
+          "max": 14384.0
+        },
+        {
+          "class": "Fuzzers",
+          "count": 18184,
+          "mean": 520.6022,
+          "median": 268.0,
+          "q1": 0.0,
+          "q3": 682.0,
+          "min": 0.0,
+          "max": 581063.0
+        },
+        {
+          "class": "Shellcode",
+          "count": 1133,
+          "mean": 145.3398,
+          "median": 0.0,
+          "q1": 0.0,
+          "q3": 268.0,
+          "min": 0.0,
+          "max": 354.0
+        }
+      ]
+    },
+    {
+      "feature": "rate",
+      "classes": [
+        {
+          "class": "Normal",
+          "count": 56000,
+          "mean": 13799.3121,
+          "median": 1382.2566,
+          "q1": 30.7307,
+          "q3": 3177.6928,
+          "min": 0.0,
+          "max": 1000000.003
+        },
+        {
+          "class": "Backdoor",
+          "count": 1746,
+          "mean": 147399.7969,
+          "median": 111111.1072,
+          "q1": 52.7175,
+          "q3": 200000.0051,
+          "min": 0.0,
+          "max": 1000000.003
+        },
+        {
+          "class": "Analysis",
+          "count": 2000,
+          "mean": 140031.1187,
+          "median": 111111.1072,
+          "q1": 27.0313,
+          "q3": 166666.6608,
+          "min": 0.0,
+          "max": 1000000.003
+        },
+        {
+          "class": "Fuzzers",
+          "count": 18184,
+          "mean": 67191.4415,
+          "median": 32.3413,
+          "q1": 18.9387,
+          "q3": 111111.1072,
+          "min": 0.0,
+          "max": 1000000.003
+        },
+        {
+          "class": "Shellcode",
+          "count": 1133,
+          "mean": 100977.7754,
+          "median": 47619.048,
+          "q1": 32.0618,
+          "q3": 125000.0003,
+          "min": 1.3776,
+          "max": 1000000.003
+        }
+      ]
+    },
+    {
+      "feature": "sttl",
+      "classes": [
+        {
+          "class": "Normal",
+          "count": 56000,
+          "mean": 75.446,
+          "median": 31.0,
+          "q1": 31.0,
+          "q3": 31.0,
+          "min": 0.0,
+          "max": 255.0
+        },
+        {
+          "class": "Backdoor",
+          "count": 1746,
+          "mean": 247.7491,
+          "median": 254.0,
+          "q1": 254.0,
+          "q3": 254.0,
+          "min": 0.0,
+          "max": 254.0
+        },
+        {
+          "class": "Analysis",
+          "count": 2000,
+          "mean": 200.723,
+          "median": 254.0,
+          "q1": 62.0,
+          "q3": 254.0,
+          "min": 0.0,
+          "max": 254.0
+        },
+        {
+          "class": "Fuzzers",
+          "count": 18184,
+          "mean": 253.2204,
+          "median": 254.0,
+          "q1": 254.0,
+          "q3": 254.0,
+          "min": 0.0,
+          "max": 255.0
+        },
+        {
+          "class": "Shellcode",
+          "count": 1133,
+          "mean": 254.0,
+          "median": 254.0,
+          "q1": 254.0,
+          "q3": 254.0,
+          "min": 254.0,
+          "max": 254.0
+        }
+      ]
+    },
+    {
+      "feature": "dttl",
+      "classes": [
+        {
+          "class": "Normal",
+          "count": 56000,
+          "mean": 64.2763,
+          "median": 29.0,
+          "q1": 29.0,
+          "q3": 29.0,
+          "min": 0.0,
+          "max": 254.0
+        },
+        {
+          "class": "Backdoor",
+          "count": 1746,
+          "mean": 41.2165,
+          "median": 0.0,
+          "q1": 0.0,
+          "q3": 0.0,
+          "min": 0.0,
+          "max": 252.0
+        },
+        {
+          "class": "Analysis",
+          "count": 2000,
+          "mean": 71.304,
+          "median": 0.0,
+          "q1": 0.0,
+          "q3": 252.0,
+          "min": 0.0,
+          "max": 252.0
+        },
+        {
+          "class": "Fuzzers",
+          "count": 18184,
+          "mean": 163.0836,
+          "median": 252.0,
+          "q1": 0.0,
+          "q3": 252.0,
+          "min": 0.0,
+          "max": 252.0
+        },
+        {
+          "class": "Shellcode",
+          "count": 1133,
+          "mean": 123.887,
+          "median": 0.0,
+          "q1": 0.0,
+          "q3": 252.0,
+          "min": 0.0,
+          "max": 252.0
+        }
+      ]
+    },
+    {
+      "feature": "sload",
+      "classes": [
+        {
+          "class": "Normal",
+          "count": 56000,
+          "mean": 23170702.7308,
+          "median": 431327.6562,
+          "q1": 12352.6201,
+          "q3": 827367.0781,
+          "min": 0.0,
+          "max": 5344000000.0
+        },
+        {
+          "class": "Backdoor",
+          "count": 1746,
+          "mean": 119315006.0373,
+          "median": 88888888.0,
+          "q1": 18984.5723,
+          "q3": 160000000.0,
+          "min": 0.0,
+          "max": 2560000000.0
+        },
+        {
+          "class": "Analysis",
+          "count": 2000,
+          "mean": 111326829.8002,
+          "median": 88888888.0,
+          "q1": 9392.5576,
+          "q3": 133333328.0,
+          "min": 0.0,
+          "max": 800000000.0
+        },
+        {
+          "class": "Fuzzers",
+          "count": 18184,
+          "mean": 134145333.4488,
+          "median": 16591.793,
+          "q1": 6561.1239,
+          "q3": 80000000.0,
+          "min": 0.0,
+          "max": 5988000256.0
+        },
+        {
+          "class": "Shellcode",
+          "count": 1133,
+          "mean": 132999703.3126,
+          "median": 36631580.0,
+          "q1": 10430.0537,
+          "q3": 156444432.0,
+          "min": 293.0172,
+          "max": 2976000000.0
+        }
+      ]
+    }
+  ]
+}

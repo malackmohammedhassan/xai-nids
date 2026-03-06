@@ -1,13 +1,14 @@
-"""Training endpoints — start job, status, WebSocket stream."""
+"""Training endpoints — start job, status, WebSocket stream, pipeline recommendations."""
 from __future__ import annotations
 
 import asyncio
 import json
 import time
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
 
 from schemas.training import TrainRequest, TrainStarted, TrainStatusResponse
+from schemas.pipeline import PipelineRecommendation
 from services.dataset_service import get_dataset_meta
 from services.training_manager import get_training_manager
 
@@ -56,6 +57,15 @@ async def start_training(req: TrainRequest):
     # Store current event loop so background thread can broadcast via WebSocket
     manager.set_event_loop(asyncio.get_event_loop())
 
+    # Estimate duration for UI
+    mode = "quick" if req.pipeline_config is None else "custom"
+    try:
+        from services.dataset_service import _load_dataframe
+        _meta = get_dataset_meta(req.dataset_id)
+        est_secs = 60 if _meta.get("rows", 0) < 10_000 else 300
+    except Exception:
+        est_secs = 120
+
     # Launch background task
     from services.ml_service import run_training_job
     asyncio.create_task(
@@ -68,10 +78,13 @@ async def start_training(req: TrainRequest):
             random_state=req.random_state,
             manager=manager,
             task_id=task_id,
+            pipeline_config=req.pipeline_config,
+            use_optuna=req.use_optuna,
         )
     )
 
-    return TrainStarted(task_id=task_id, status="started", estimated_duration_seconds=120)
+    return TrainStarted(task_id=task_id, status="started",
+                        estimated_duration_seconds=est_secs, mode=mode)
 
 
 @router.get("/models/train/configs")
@@ -94,6 +107,41 @@ async def model_configs(plugin: str | None = None):
                 configs.append({"plugin": p.plugin_name, "model_type": model_type})
 
     return {"configs": configs}
+
+
+@router.get("/models/train/recommend/{dataset_id}", response_model=PipelineRecommendation)
+async def recommend_pipeline(dataset_id: str, target_column: str | None = None):
+    """
+    Analyse *dataset_id* and return per-step pipeline recommendations.
+
+    The frontend uses this to pre-fill the Custom Train builder and
+    explain which options are available / disabled for this specific dataset.
+    """
+    try:
+        meta = get_dataset_meta(dataset_id)
+    except Exception:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "dataset_not_found", "dataset_id": dataset_id},
+        )
+
+    from services.dataset_service import _load_dataframe
+    from services.pipeline_advisor import advise_pipeline
+
+    try:
+        df = _load_dataframe(dataset_id)
+        recommendation = advise_pipeline(
+            df=df,
+            dataset_id=dataset_id,
+            dataset_name=meta.get("filename", dataset_id),
+            target_column=target_column,
+        )
+        return recommendation
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail={"error": "advisor_failed", "message": str(exc)},
+        )
 
 
 @router.get("/models/train/status", response_model=TrainStatusResponse)

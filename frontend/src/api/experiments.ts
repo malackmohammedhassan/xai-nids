@@ -3,7 +3,7 @@ import type { ExperimentRun } from '@/types';
 
 export const experimentsApi = {
   list: (): Promise<ExperimentRun[]> =>
-    get<ExperimentRun[]>('/experiments'),
+    get<{ experiments: ExperimentRun[]; total: number }>('/experiments').then((r) => r.experiments),
 
   get: (runId: string): Promise<ExperimentRun> =>
     get<ExperimentRun>(`/experiments/${runId}`),

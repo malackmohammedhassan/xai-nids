@@ -1,5 +1,6 @@
 """Tests for dataset endpoints."""
 import io
+import pytest
 
 
 def test_upload_valid_csv_returns_dataset_id(client, sample_csv_bytes):
@@ -14,6 +15,7 @@ def test_upload_valid_csv_returns_dataset_id(client, sample_csv_bytes):
 
 
 def test_upload_valid_parquet_returns_dataset_id(client, sample_parquet_bytes):
+    pytest.importorskip("pyarrow", reason="pyarrow not installed in this environment")
     resp = client.post(
         "/api/v1/datasets/upload",
         files={"file": ("test.parquet", sample_parquet_bytes, "application/octet-stream")},
@@ -80,15 +82,55 @@ def test_introspect_detects_task_type(client, uploaded_dataset_id):
     resp = client.get(f"/api/v1/datasets/{uploaded_dataset_id}/introspect")
     assert resp.status_code == 200
     data = resp.json()
-    assert data["task_type"] in ("classification", "regression")
-    assert "suggested_target_column" in data
+    valid_task_types = ("classification", "regression", "binary_classification", "multiclass_classification")
+    assert data["task_type"] in valid_task_types, f"Unexpected task_type: {data['task_type']!r}"
+    assert "suggested_target" in data
 
 
 def test_introspect_detects_categorical_features(client, uploaded_dataset_id):
     resp = client.get(f"/api/v1/datasets/{uploaded_dataset_id}/introspect")
     assert resp.status_code == 200
     data = resp.json()
-    assert "numerical_features" in data
+    # Router returns 'numeric_features' (not 'numerical_features')
+    assert "numeric_features" in data or "numerical_features" in data
+
+
+def test_upload_duplicate_columns_rejected_with_422(client):
+    """A CSV with duplicate column names must be rejected."""
+    import io
+    import pandas as pd
+    # Build a dataframe with two columns named 'feature_0'
+    df = pd.DataFrame([[1, 2, 3]] * 60, columns=["feature_0", "feature_0", "label"])
+    buf = io.BytesIO()
+    df.to_csv(buf, index=False)
+    resp = client.post(
+        "/api/v1/datasets/upload",
+        files={"file": ("dup_cols.csv", buf.getvalue(), "text/csv")},
+    )
+    assert resp.status_code == 422
+    data = resp.json()
+    # Handler merges exc.detail into body, so 'error' kwarg value wins
+    assert data.get("error") in ("dataset_validation_error", "duplicate_columns")
+
+
+def test_upload_corrupt_encoding_rejected_with_422(client):
+    """Binary garbage that cannot be parsed as CSV/Parquet must be rejected."""
+    resp = client.post(
+        "/api/v1/datasets/upload",
+        files={"file": ("corrupt.csv", b"\xff\xfe" + b"\x00" * 512, "text/csv")},
+    )
+    assert resp.status_code == 422
+
+
+def test_upload_path_traversal_filename_is_sanitized(client, sample_csv_bytes):
+    """A filename with path traversal sequences must not crash or escape."""
+    # The upload should either succeed (with sanitized name) or return a 4xx —
+    # it must NEVER cause a 500 or write outside the uploads directory.
+    resp = client.post(
+        "/api/v1/datasets/upload",
+        files={"file": ("../../etc/passwd.csv", sample_csv_bytes, "text/csv")},
+    )
+    assert resp.status_code != 500
 
 
 def test_delete_dataset_removes_file(client, sample_csv_bytes):

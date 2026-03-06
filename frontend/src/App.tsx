@@ -1,19 +1,26 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 
 import { Layout } from '@/components/layout/Layout';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
+import { GlobalTaskBar } from '@/components/tasks/GlobalTaskBar';
+import { useJobWebSocket } from '@/hooks/useJobWebSocket';
+import { useSession } from '@/hooks/useSession';
+import { usePersistedStore } from '@/hooks/usePersistedStore';
+import { FEATURES } from '@/utils/features';
 
 // Lazy-load pages for code splitting
-const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
-const DatasetPage = lazy(() => import('@/pages/DatasetPage'));
-const TrainingPage = lazy(() => import('@/pages/TrainingPage'));
-const EvaluationPage = lazy(() => import('@/pages/EvaluationPage'));
+const DashboardPage      = lazy(() => import('@/pages/DashboardPage'));
+const DatasetPage        = lazy(() => import('@/pages/DatasetPage'));
+const TrainingPage       = lazy(() => import('@/pages/TrainingPage'));
+const EvaluationPage     = lazy(() => import('@/pages/EvaluationPage'));
 const ExplainabilityPage = lazy(() => import('@/pages/ExplainabilityPage'));
-const PredictionPage = lazy(() => import('@/pages/PredictionPage'));
-const ExperimentsPage = lazy(() => import('@/pages/ExperimentsPage'));
+const PredictionPage     = lazy(() => import('@/pages/PredictionPage'));
+const ExperimentsPage    = lazy(() => import('@/pages/ExperimentsPage'));
+const MetricsPage        = lazy(() => import('@/pages/MetricsPage'));
+const ValidationPage     = lazy(() => import('@/pages/ValidationPage'));
 
 function PageFallback() {
   return (
@@ -30,6 +37,14 @@ function NotFound() {
       <p className="text-gray-400">Page not found</p>
     </div>
   );
+}
+
+/** Initialise global hooks (WS, session, persistence) once at app root */
+function AppInit() {
+  useJobWebSocket();
+  useSession(); // loads from server on mount
+  usePersistedStore(); // restores + auto-saves selected ids, recent jobs
+  return null;
 }
 
 export default function App() {
@@ -49,6 +64,8 @@ export default function App() {
             error: { iconTheme: { primary: '#f87171', secondary: '#1f2937' } },
           }}
         />
+
+        <AppInit />
 
         <Routes>
           <Route element={<Layout />}>
@@ -108,11 +125,34 @@ export default function App() {
                 </Suspense>
               }
             />
+            <Route
+              path="validation"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <ValidationPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="tasks"
+              element={<Navigate to="/" replace />}
+            />
             {/* Legacy routes from old app */}
             <Route path="models" element={<Navigate to="/evaluation" replace />} />
+            <Route
+              path="metrics"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <MetricsPage />
+                </Suspense>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
+
+        {/* Floating task FAB — visible on all pages */}
+        {FEATURES.taskPanel && <GlobalTaskBar />}
       </ErrorBoundary>
     </BrowserRouter>
   );

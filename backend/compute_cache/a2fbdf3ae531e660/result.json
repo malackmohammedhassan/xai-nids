@@ -1,0 +1,171 @@
+{
+  "viz_type": "mutual_info",
+  "dataset_id": "c4c40d41-17f4-4d1e-8c14-54e0df0ac1e6",
+  "target_column": "attack_cat",
+  "data": [
+    {
+      "feature": "sbytes",
+      "mi_score": 1.1503
+    },
+    {
+      "feature": "smean",
+      "mi_score": 0.928
+    },
+    {
+      "feature": "sload",
+      "mi_score": 0.9047
+    },
+    {
+      "feature": "id",
+      "mi_score": 0.8475
+    },
+    {
+      "feature": "dbytes",
+      "mi_score": 0.6352
+    },
+    {
+      "feature": "label",
+      "mi_score": 0.6347
+    },
+    {
+      "feature": "rate",
+      "mi_score": 0.5504
+    },
+    {
+      "feature": "dmean",
+      "mi_score": 0.5457
+    },
+    {
+      "feature": "dur",
+      "mi_score": 0.5377
+    },
+    {
+      "feature": "ct_dst_sport_ltm",
+      "mi_score": 0.5232
+    },
+    {
+      "feature": "ct_srv_dst",
+      "mi_score": 0.5106
+    },
+    {
+      "feature": "ct_state_ttl",
+      "mi_score": 0.4944
+    },
+    {
+      "feature": "dttl",
+      "mi_score": 0.4921
+    },
+    {
+      "feature": "ct_srv_src",
+      "mi_score": 0.4831
+    },
+    {
+      "feature": "dload",
+      "mi_score": 0.4813
+    },
+    {
+      "feature": "ct_dst_src_ltm",
+      "mi_score": 0.4813
+    },
+    {
+      "feature": "sttl",
+      "mi_score": 0.4739
+    },
+    {
+      "feature": "dinpkt",
+      "mi_score": 0.4736
+    },
+    {
+      "feature": "ct_src_dport_ltm",
+      "mi_score": 0.4674
+    },
+    {
+      "feature": "dpkts",
+      "mi_score": 0.4658
+    },
+    {
+      "feature": "ct_dst_ltm",
+      "mi_score": 0.4596
+    },
+    {
+      "feature": "sinpkt",
+      "mi_score": 0.4402
+    },
+    {
+      "feature": "synack",
+      "mi_score": 0.396
+    },
+    {
+      "feature": "ct_src_ltm",
+      "mi_score": 0.3937
+    },
+    {
+      "feature": "tcprtt",
+      "mi_score": 0.3928
+    },
+    {
+      "feature": "sjit",
+      "mi_score": 0.3915
+    },
+    {
+      "feature": "ackdat",
+      "mi_score": 0.3865
+    },
+    {
+      "feature": "spkts",
+      "mi_score": 0.3755
+    },
+    {
+      "feature": "djit",
+      "mi_score": 0.358
+    },
+    {
+      "feature": "dloss",
+      "mi_score": 0.3418
+    },
+    {
+      "feature": "sloss",
+      "mi_score": 0.3036
+    },
+    {
+      "feature": "stcpb",
+      "mi_score": 0.213
+    },
+    {
+      "feature": "dtcpb",
+      "mi_score": 0.2057
+    },
+    {
+      "feature": "swin",
+      "mi_score": 0.1979
+    },
+    {
+      "feature": "dwin",
+      "mi_score": 0.1969
+    },
+    {
+      "feature": "response_body_len",
+      "mi_score": 0.0756
+    },
+    {
+      "feature": "ct_flw_http_mthd",
+      "mi_score": 0.0445
+    },
+    {
+      "feature": "trans_depth",
+      "mi_score": 0.0421
+    },
+    {
+      "feature": "is_sm_ips_ports",
+      "mi_score": 0.0188
+    },
+    {
+      "feature": "ct_ftp_cmd",
+      "mi_score": 0.0118
+    },
+    {
+      "feature": "is_ftp_login",
+      "mi_score": 0.0117
+    }
+  ]
+}

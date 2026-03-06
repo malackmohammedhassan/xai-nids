@@ -168,7 +168,9 @@ class XAIIDSPlugin(BaseMLPlugin):
             y_prob = np.array(result["y_prob"])
             y_true = np.array(result["y_test"])
             if y_prob.ndim == 2:
-                y_scores = y_prob[:, 1]
+                # Use column 1 (positive class) when available; fall back to column 0
+                # to handle the edge case where the model only outputs one class
+                y_scores = y_prob[:, 1] if y_prob.shape[1] > 1 else y_prob[:, 0]
             else:
                 y_scores = y_prob
             try:
@@ -211,6 +213,8 @@ class XAIIDSPlugin(BaseMLPlugin):
             if f not in df.columns:
                 df[f] = 0
         df = df[feature_names]
+        # Coerce to numeric — frontend sends all values as strings from form inputs
+        df = df.apply(pd.to_numeric, errors="coerce").fillna(0)
 
         preds = model.predict(df)
         proba = model.predict_proba(df) if hasattr(model, "predict_proba") else None
@@ -253,6 +257,8 @@ class XAIIDSPlugin(BaseMLPlugin):
             if f not in df_row.columns:
                 df_row[f] = 0
         df_row = df_row[feature_names]
+        # Coerce to numeric — frontend sends all values as strings from form inputs
+        df_row = df_row.apply(pd.to_numeric, errors="coerce").fillna(0)
 
         result: Dict[str, Any] = {"method_used": method}
         class_names = ["Normal", "Attack"]

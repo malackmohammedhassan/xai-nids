@@ -36,6 +36,16 @@ class RequestTimingMiddleware(BaseHTTPMiddleware):
             "duration_ms": duration_ms,
         }
 
+        # Record in telemetry registry
+        try:
+            from core.telemetry import get_registry
+            reg = get_registry()
+            reg.record_request(request.url.path, float(duration_ms))
+            if response.status_code >= 400:
+                reg.record_error(f"http_{response.status_code}")
+        except Exception:
+            pass  # telemetry must never break requests
+
         if duration_ms > SLOW_THRESHOLD_MS:
             logger.warning("Slow request detected", extra=log_extra)
         else:

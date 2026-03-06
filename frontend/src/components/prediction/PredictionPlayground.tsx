@@ -1,19 +1,51 @@
-import { useState, type ChangeEvent } from 'react';
+import { useState, useEffect, type ChangeEvent } from 'react';
 import { Play, ShieldAlert, ShieldCheck, Loader2 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { DatasetRowSampler } from '@/components/common/DatasetRowSampler';
 import type { PredictionResult } from '@/types';
+import type { DatasetListItem } from '@/types';
 
 interface Props {
   featureNames: string[];
   onPredict: (features: Record<string, unknown>) => Promise<PredictionResult>;
   result?: PredictionResult | null;
   loading?: boolean;
+  /** UUID of the dataset the model was trained on — enables the row sampler. */
+  datasetId?: string | null;
+  /** Target / label column name — shown next to the loaded row label. */
+  targetColumn?: string;
+  /** Available datasets for fallback picker when datasetId is unknown. */
+  datasets?: DatasetListItem[];
+  /** When set externally (e.g. from history re-select), syncs into local state. */
+  externalValues?: Record<string, string>;
 }
 
-export function PredictionPlayground({ featureNames, onPredict, result, loading = false }: Props) {
+export function PredictionPlayground({
+  featureNames,
+  onPredict,
+  result,
+  loading = false,
+  datasetId,
+  targetColumn,
+  datasets = [],
+  externalValues,
+}: Props) {
+  const safeFeatures = featureNames ?? [];
   const [values, setValues] = useState<Record<string, string>>(() =>
-    Object.fromEntries(featureNames.map((f) => [f, '0']))
+    Object.fromEntries(safeFeatures.map((f) => [f, '0']))
   );
+
+  // Re-initialise when featureNames change (new model selected)
+  useEffect(() => {
+    setValues(Object.fromEntries(safeFeatures.map((f) => [f, '0'])));
+  }, [featureNames]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sync when the parent pushes external values (e.g. history re-select)
+  useEffect(() => {
+    if (externalValues && Object.keys(externalValues).length > 0) {
+      setValues(externalValues);
+    }
+  }, [externalValues]);
 
   const handleChange = (feature: string, value: string) => {
     setValues((prev) => ({ ...prev, [feature]: value }));
@@ -36,9 +68,18 @@ export function PredictionPlayground({ featureNames, onPredict, result, loading 
 
   return (
     <div className="space-y-5">
+      {/* ── Row sampler ───────────────────────────────────────────────────── */}
+      <DatasetRowSampler
+        datasetId={datasetId ?? null}
+        featureNames={safeFeatures}
+        targetColumn={targetColumn}
+        datasets={datasets}
+        onLoad={(filled) => setValues(filled)}
+      />
+
       {/* Feature input grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {featureNames.map((feature) => (
+        {safeFeatures.map((feature) => (
           <div key={feature}>
             <label htmlFor={`feat-${feature}`} className="text-gray-400 text-xs block mb-1 truncate" title={feature}>
               {feature}

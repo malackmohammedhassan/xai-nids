@@ -10,6 +10,12 @@ export function useWebSocket(onMessage: (event: TrainingProgressEvent) => void) 
   const retriesRef = useRef(0);
   const mountedRef = useRef(true);
   const [connected, setConnected] = useState(false);
+  // Keep a stable ref to the latest onMessage — updating the ref never
+  // triggers a reconnect, so the WebSocket is only created once.
+  const onMessageRef = useRef(onMessage);
+  useEffect(() => {
+    onMessageRef.current = onMessage;
+  });
 
   const connect = useCallback(() => {
     if (!mountedRef.current) return;
@@ -26,7 +32,7 @@ export function useWebSocket(onMessage: (event: TrainingProgressEvent) => void) 
     ws.onmessage = (e) => {
       try {
         const data: TrainingProgressEvent = JSON.parse(e.data as string);
-        onMessage(data);
+        onMessageRef.current(data);
       } catch {
         // ignore parse errors
       }
@@ -45,7 +51,9 @@ export function useWebSocket(onMessage: (event: TrainingProgressEvent) => void) 
     ws.onerror = () => {
       ws.close();
     };
-  }, [onMessage]);
+  // onMessage intentionally excluded — use onMessageRef to avoid reconnects
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     mountedRef.current = true;

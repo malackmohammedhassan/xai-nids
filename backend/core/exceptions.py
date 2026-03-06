@@ -7,6 +7,19 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 
 
+def _cors_headers(request: Request, response: JSONResponse) -> None:
+    """Stamp CORS headers so the browser can read error responses."""
+    try:
+        from core.config import get_settings
+        allowed = get_settings().cors_origins
+    except Exception:
+        allowed = ["http://localhost:5173"]
+    origin = request.headers.get("origin", "")
+    if origin and ("*" in allowed or origin in allowed):
+        response.headers["access-control-allow-origin"] = origin
+        response.headers["access-control-allow-credentials"] = "true"
+
+
 # ── Domain exceptions ─────────────────────────────────────────────────────────
 
 class XAINIDSException(Exception):
@@ -95,7 +108,9 @@ async def xai_exception_handler(request: Request, exc: XAINIDSException) -> JSON
         "message": exc.message,
         **exc.detail,
     }
-    return JSONResponse(status_code=exc.status_code, content=body)
+    resp = JSONResponse(status_code=exc.status_code, content=body)
+    _cors_headers(request, resp)
+    return resp
 
 
 async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
@@ -103,7 +118,9 @@ async def generic_exception_handler(request: Request, exc: Exception) -> JSONRes
 
     logger = get_logger("exceptions")
     logger.error("Unhandled exception", extra={"path": request.url.path, "exc": str(exc)})
-    return JSONResponse(
+    resp = JSONResponse(
         status_code=500,
         content={"error": "internal_error", "message": "An unexpected error occurred."},
     )
+    _cors_headers(request, resp)
+    return resp

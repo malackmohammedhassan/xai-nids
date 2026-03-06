@@ -1,0 +1,9 @@
+{
+  "dataset_id": "209d1325-678d-4dca-8388-a1b468c5e749",
+  "filename": "UNSW-NB15_1.csv",
+  "rows": 700000,
+  "columns": 49,
+  "size_bytes": 168979718,
+  "upload_timestamp": "2026-02-28T23:05:20.388073+00:00",
+  "ext": "csv"
+}

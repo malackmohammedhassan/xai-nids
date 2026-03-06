@@ -19,7 +19,17 @@ export function ROCCurve({ fpr, tpr, auc }: Props) {
   if (!fpr?.length || !tpr?.length || fpr.length !== tpr.length) {
     return <div className="bg-gray-800 rounded-xl p-5 text-gray-500 text-sm">No ROC curve data available</div>;
   }
-  const data = fpr.map((x, i) => ({ fpr: +x.toFixed(3), tpr: +tpr[i].toFixed(3) }));
+  // Filter out any null/undefined/NaN entries that the backend can emit (e.g. Inf thresholds)
+  const data = fpr
+    .map((x, i) => {
+      const f = x == null ? null : +Number(x).toFixed(3);
+      const t = tpr[i] == null ? null : +Number(tpr[i]).toFixed(3);
+      return f != null && t != null ? { fpr: f, tpr: t } : null;
+    })
+    .filter((pt): pt is { fpr: number; tpr: number } => pt !== null);
+  if (!data.length) {
+    return <div className="bg-gray-800 rounded-xl p-5 text-gray-500 text-sm">No ROC curve data available</div>;
+  }
   const { grade, color } = auc !== undefined ? metricGrade(auc) : { grade: '?', color: 'text-gray-400' };
 
   return (

@@ -1,7 +1,10 @@
 """Prediction endpoint with feature validation."""
 from __future__ import annotations
 
+import asyncio
+import os
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 from fastapi import APIRouter
 
@@ -9,6 +12,13 @@ from schemas.prediction import PredictRequest, PredictResponse, SinglePrediction
 from services.model_registry import get_loaded_model
 
 router = APIRouter()
+
+# Bounded thread pool for CPU-bound inference.  Keeps asyncio event loop free
+# under burst traffic.  Capped at CPU cores to avoid oversubscription.
+_PREDICT_POOL = ThreadPoolExecutor(
+    max_workers=min(32, (os.cpu_count() or 4)),
+    thread_name_prefix="predict",
+)
 
 
 @router.post("/models/{model_id}/predict", response_model=PredictResponse)
@@ -59,8 +69,12 @@ async def predict(model_id: str, req: PredictRequest):
     plugin = get_plugin(get_settings().default_plugin)
     model = bundle["model"]
 
+    loop = asyncio.get_event_loop()
     t_start = time.perf_counter()
-    raw_results = plugin.predict(model, req.inputs, feature_names)
+    raw_results = await loop.run_in_executor(
+        _PREDICT_POOL,
+        lambda: plugin.predict(model, req.inputs, feature_names),
+    )
     duration_ms = int((time.perf_counter() - t_start) * 1000)
 
     predictions = [

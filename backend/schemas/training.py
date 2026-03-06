@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field, field_validator
+from schemas.pipeline import PipelineConfig
 
 
 class TrainingStatus(str, Enum):
@@ -20,14 +21,18 @@ class TrainRequest(BaseModel):
     target_column: str
     model_type: str
     hyperparameters: Dict[str, Any] = Field(default_factory=dict)
-    test_size: float = Field(default=0.2, ge=0.1, le=0.4)
+    test_size: float = Field(default=0.2, ge=0.05, le=0.4)
     random_state: int = Field(default=42, ge=0)
+    # Optional full pipeline configuration (Custom Train mode).
+    # When provided, overrides test_size (use pipeline_config.split.test_size instead).
+    pipeline_config: Optional[PipelineConfig] = None
+    use_optuna: bool = True
 
     @field_validator("test_size")
     @classmethod
     def validate_test_size(cls, v: float) -> float:
-        if not (0.1 <= v <= 0.4):
-            raise ValueError("test_size must be between 0.1 and 0.4")
+        if not (0.05 <= v <= 0.4):
+            raise ValueError("test_size must be between 0.05 and 0.4")
         return v
 
 
@@ -35,6 +40,7 @@ class TrainStarted(BaseModel):
     task_id: str
     status: str = "started"
     estimated_duration_seconds: Optional[int] = None
+    mode: str = "quick"   # "quick" | "custom"
 
 
 class TrainStatusResponse(BaseModel):

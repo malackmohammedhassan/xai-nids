@@ -29,6 +29,8 @@ async def run_training_job(
     random_state: int,
     manager: TrainingManager,
     task_id: str,
+    pipeline_config: Any = None,
+    use_optuna: bool = True,
 ) -> None:
     """Background task — run in executor to avoid blocking event loop."""
     loop = asyncio.get_running_loop()
@@ -37,7 +39,7 @@ async def run_training_job(
             None,
             _blocking_train,
             dataset_id, target_column, model_type, hyperparameters,
-            test_size, random_state, manager, task_id,
+            test_size, random_state, manager, task_id, pipeline_config, use_optuna,
         )
     except Exception as exc:
         logger.error("Training job failed", extra={"task_id": task_id, "error": str(exc)})
@@ -61,6 +63,8 @@ def _blocking_train(
     random_state: int,
     manager: TrainingManager,
     task_id: str,
+    pipeline_config: Any = None,
+    use_optuna: bool = True,
 ) -> None:
     from plugins import get_plugin
 
@@ -96,39 +100,103 @@ def _blocking_train(
         tmp_path = tmp.name
 
     try:
-        manager.update_progress("Loading data", 1, 6, {})
-        X_train, X_test, y_train, y_test, feature_names, label_encoder = plugin.load_data(
-            tmp_path, target_column
-        )
-        manager.update_progress("Preprocessing", 2, 6, {})
+        if pipeline_config is not None:
+            # ── Custom Train path ─────────────────────────────────────────────
+            manager.update_progress("Custom pipeline: loading data", 1, 6, {})
+            from services.custom_preprocessor import preprocess_with_config
+            prep = preprocess_with_config(
+                df=df,
+                target_column=target_column,
+                config=pipeline_config,
+                model_type=model_type,
+                random_state=random_state,
+                progress_callback=progress_callback,
+            )
+            X_train       = prep["X_train"]
+            X_test        = prep["X_test"]
+            y_train       = prep["y_train"]
+            y_test        = prep["y_test"]
+            feature_names = prep["feature_names"]
+            label_encoder = prep["label_encoder"]
+            cv_results    = prep.get("cv_results")
+            class_weight  = prep.get("class_weight")
+            class_names   = prep.get("class_names", ["Normal", "Attack"])
 
-        manager.update_progress("Training model", 3, 6, {})
-        trained_model, train_meta = plugin.train(
-            X_train, y_train, model_type, hyperparameters, progress_callback
-        )
+            # Broadcast cv results if available
+            if cv_results:
+                emit({"event": "cv_results", "data": cv_results})
+
+            manager.update_progress("Training model", 3, 6, {})
+            # For custom mode, always use direct training (user chose HPs or use_optuna flag)
+            if not use_optuna and hyperparameters:
+                from plugins.xai_ids_plugin import _build_model
+                from app.config import RANDOM_STATE  # type: ignore
+                trained_model = _build_model(model_type, hyperparameters, random_state)
+                if class_weight:
+                    if hasattr(trained_model, 'class_weight'):
+                        trained_model.set_params(class_weight=class_weight)
+                trained_model.fit(X_train, y_train)
+                train_meta = {"best_params": hyperparameters, "duration": 0.0,
+                              "class_names": class_names,
+                              "scaler": prep.get("scaler"),
+                              "selector": prep.get("selector"),
+                              "le_dict": prep.get("le_dict", {}),
+                              "original_columns": prep.get("original_columns", feature_names)}
+            else:
+                # Use Optuna via plugin.train (it will accept pre-processed data)
+                manager.update_progress("Running Optuna on custom-preprocessed data", 3, 6, {})
+                from app.training import train_model  # type: ignore
+                trained_model, best_params, duration = train_model(X_train, y_train, model_type=model_type, mode="binary")
+                train_meta = {"best_params": best_params, "duration": duration,
+                              "class_names": class_names,
+                              "scaler": prep.get("scaler"),
+                              "selector": prep.get("selector"),
+                              "le_dict": prep.get("le_dict", {}),
+                              "original_columns": prep.get("original_columns", feature_names)}
+        else:
+            # ── Quick Train path (existing behaviour) ─────────────────────────
+            manager.update_progress("Loading data", 1, 6, {})
+            X_train, X_test, y_train, y_test, feature_names, label_encoder = plugin.load_data(
+                tmp_path, target_column
+            )
+            cv_results   = None
+            class_weight = None
+            class_names  = ["Normal", "Attack"]
+            manager.update_progress("Preprocessing", 2, 6, {})
+
+            manager.update_progress("Training model", 3, 6, {})
+            trained_model, train_meta = plugin.train(
+                X_train, y_train, model_type, hyperparameters, progress_callback
+            )
         manager.update_progress("Evaluating", 4, 6, {})
         eval_result = plugin.evaluate(trained_model, X_test, y_test, feature_names)
         manager.update_progress("Saving model", 5, 6, {})
 
         bundle = {
-            "model": trained_model,
-            "feature_names": feature_names,
-            "class_names": train_meta.get("class_names", ["0", "1"]),
-            "scaler": train_meta.get("scaler"),
-            "selector": train_meta.get("selector"),
-            "le_dict": train_meta.get("le_dict", {}),
+            "model":            trained_model,
+            "feature_names":    feature_names,
+            "class_names":      train_meta.get("class_names", class_names),
+            "scaler":           train_meta.get("scaler"),
+            "selector":         train_meta.get("selector"),
+            "le_dict":          train_meta.get("le_dict", {}),
             "original_columns": train_meta.get("original_columns", feature_names),
-            "model_type": model_type,
+            "model_type":       model_type,
         }
 
         metrics = eval_result.get("metrics", {})
         model_metadata = {
+            "dataset_id":       dataset_id,
             "dataset_filename": meta["filename"],
-            "accuracy": metrics.get("accuracy"),
-            "f1_score": metrics.get("f1_score"),
-            "hyperparameters": hyperparameters or train_meta.get("best_params", {}),
-            "feature_count": len(feature_names),
-            "full_metrics": eval_result,
+            "target_column":    target_column,
+            "accuracy":         metrics.get("accuracy"),
+            "f1_score":         metrics.get("f1_score"),
+            "hyperparameters":  hyperparameters or train_meta.get("best_params", {}),
+            "feature_names":    list(feature_names),
+            "feature_count":    len(feature_names),
+            "full_metrics":     eval_result,
+            "pipeline_config":  pipeline_config.model_dump() if pipeline_config else None,
+            "cv_results":       cv_results,
+            "training_mode":    "custom" if pipeline_config else "quick",
         }
         saved_model_id = save_model(bundle, model_type, run_id, model_metadata)
 
@@ -149,23 +217,8 @@ def _blocking_train(
         }
         save_run(run_record)
         manager.update_progress("Complete", 6, 6, metrics)
-        manager.release_lock(failed=False)
-
-        try:
-            loop.run_until_complete(
-                manager.broadcast({
-                    "event": "complete",
-                    "data": {
-                        "task_id": task_id,
-                        "run_id": run_id,
-                        "model_id": saved_model_id,
-                        "final_metrics": metrics,
-                        "duration_seconds": run_record["training_duration_seconds"],
-                    },
-                })
-            )
-        except Exception:
-            pass
+        # Pass model_id and run_id so the complete broadcast includes them
+        manager.release_lock(failed=False, model_id=saved_model_id, run_id=run_id)
 
     finally:
         Path(tmp_path).unlink(missing_ok=True)

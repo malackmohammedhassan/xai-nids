@@ -6,8 +6,11 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
+MAX_PREDICT_BATCH = 1_000  # hard cap — prevents memory exhaustion on single request
+
+
 class PredictRequest(BaseModel):
-    inputs: List[Dict[str, Any]] = Field(..., min_length=1)
+    inputs: List[Dict[str, Any]] = Field(..., min_length=1, max_length=MAX_PREDICT_BATCH)
 
 
 class SinglePrediction(BaseModel):

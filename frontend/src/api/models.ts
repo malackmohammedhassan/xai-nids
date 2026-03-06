@@ -3,7 +3,7 @@ import type { ModelMeta, ModelMetrics } from '@/types';
 
 export const modelsApi = {
   list: (): Promise<ModelMeta[]> =>
-    get<ModelMeta[]>('/models/list'),
+    get<{ models: ModelMeta[]; total: number }>('/models/list').then((r) => r.models),
 
   metrics: (modelId: string): Promise<ModelMetrics> =>
     get<ModelMetrics>(`/models/${modelId}/metrics`),
