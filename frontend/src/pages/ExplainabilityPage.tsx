@@ -61,6 +61,7 @@ export default function ExplainabilityPage() {
   const [vizTab, setVizTab] = useState<VizTab>('shap');
   const [showAllFeatures, setShowAllFeatures] = useState(false);
   const [depFeature, setDepFeature] = useState<string>('');
+  const [displayTopN, setDisplayTopN] = useState(15);
 
   useEffect(() => { fetchList(); fetchDatasets(); }, [fetchList, fetchDatasets]);
 
@@ -338,22 +339,40 @@ export default function ExplainabilityPage() {
 
               {/* Viz tabs */}
               <div className="rounded-xl border border-gray-700 bg-gray-800/50 overflow-hidden">
-                <div className="flex border-b border-gray-700 overflow-x-auto">
-                  {availableTabs.map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setVizTab(tab)}
-                      className={`px-4 py-2.5 text-xs font-medium whitespace-nowrap transition-colors border-b-2 -mb-px ${
-                        vizTab === tab ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-gray-400 hover:text-gray-200'
-                      }`}
-                    >
-                      {tab === 'shap' && 'SHAP Waterfall'}
-                      {tab === 'force' && 'SHAP Force'}
-                      {tab === 'lime' && 'LIME Weights'}
-                      {tab === 'context' && 'Feature Context'}
-                      {tab === 'raw' && 'Raw Values'}
-                    </button>
-                  ))}
+                <div className="flex items-center border-b border-gray-700">
+                  <div className="flex overflow-x-auto flex-1">
+                    {availableTabs.map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setVizTab(tab)}
+                        className={`px-4 py-2.5 text-xs font-medium whitespace-nowrap transition-colors border-b-2 -mb-px ${
+                          vizTab === tab ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-gray-400 hover:text-gray-200'
+                        }`}
+                      >
+                        {tab === 'shap' && 'SHAP Waterfall'}
+                        {tab === 'force' && 'SHAP Force'}
+                        {tab === 'lime' && 'LIME Weights'}
+                        {tab === 'context' && 'Feature Context'}
+                        {tab === 'raw' && 'Raw Values'}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Feature count slider — hidden on raw/context tabs */}
+                  {vizTab !== 'raw' && vizTab !== 'context' && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 border-l border-gray-700 shrink-0">
+                      <span className="text-[10px] text-gray-500 whitespace-nowrap">Top features</span>
+                      <input
+                        type="range"
+                        min={5}
+                        max={40}
+                        step={5}
+                        value={displayTopN}
+                        onChange={(e) => setDisplayTopN(Number(e.target.value))}
+                        className="w-20 accent-indigo-500 cursor-pointer"
+                      />
+                      <span className="text-[11px] font-mono text-indigo-300 w-5 text-right">{displayTopN}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-4">
@@ -372,7 +391,7 @@ export default function ExplainabilityPage() {
                           featureDetails={result.shap.values}
                           predictionLabel={result.shap.prediction_label}
                           attackProbability={result.shap.class_probabilities?.Attack ?? result.shap.prediction_probability}
-                          topN={20}
+                          topN={displayTopN}
                         />
                         <HowItWorks title="How to read SHAP Waterfall" learnMoreUrl="https://shap.readthedocs.io/en/latest/">
                           <p>Each bar shows one feature’s contribution to moving the prediction from the
@@ -386,7 +405,7 @@ export default function ExplainabilityPage() {
                             <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">SHAP Summary — all features</h4>
                             <SHAPSummaryBeeswarm
                               values={result.shap.values.map((v) => ({ feature: v.feature, shap_value: v.shap_value, value: v.value }))}
-                              topN={20}
+                              topN={displayTopN}
                             />
                           </div>
                         )}
@@ -435,7 +454,7 @@ export default function ExplainabilityPage() {
                           shapValues={result.shap.shap_values}
                           baseValue={result.shap.base_value}
                           prediction={prediction !== '—' ? prediction : undefined}
-                          topN={10}
+                          topN={displayTopN}
                         />
                         <HowItWorks title="How to read SHAP Force Plot">
                           <p>The force strip shows how all features together push the decision
@@ -454,7 +473,7 @@ export default function ExplainabilityPage() {
                   {vizTab === 'lime' && (
                     result.lime?.feature_weights ? (
                       <div className="space-y-3">
-                        <LIMEBarChart lime={result.lime} topN={15} />
+                        <LIMEBarChart lime={result.lime} topN={displayTopN} />
                         <HowItWorks title="How to read LIME Weights">
                           <p>LIME trains a simple linear model on perturbed samples near your input.
                           Positive weight (amber) = feature pushes toward Attack ·
