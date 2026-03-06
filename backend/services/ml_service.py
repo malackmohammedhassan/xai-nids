@@ -10,6 +10,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict
 
+import numpy as np
+
 from core.config import get_settings
 from core.logger import get_logger
 from services.dataset_service import _load_dataframe, get_dataset_meta
@@ -181,6 +183,9 @@ def _blocking_train(
             "le_dict":          train_meta.get("le_dict", {}),
             "original_columns": train_meta.get("original_columns", feature_names),
             "model_type":       model_type,
+            # Store a training sample (scaled, selected features) for LIME/SHAP background.
+            # Capped at 500 rows to keep bundle size reasonable.
+            "X_train_sample":   X_train.values[:500] if hasattr(X_train, "values") else np.array(X_train)[:500],
         }
 
         metrics = eval_result.get("metrics", {})

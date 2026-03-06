@@ -14,9 +14,8 @@ export function SHAPView({ shap }: Props) {
     return <div className="space-y-4"><p className="text-gray-500 text-sm">No SHAP explanation data available</p></div>;
   }
 
-  const isAttack = typeof shap.prediction === 'number'
-    ? shap.prediction > 0.5
-    : shap.prediction !== 'Normal' && shap.prediction !== '0';
+  const predLabel = shap.prediction_label ?? String(shap.prediction ?? '');
+  const isAttack = predLabel.toLowerCase() !== 'normal' && predLabel !== '0';
 
   // Sort shap values for bar chart
   const shapData = Object.entries(shap.shap_values)
@@ -50,7 +49,9 @@ export function SHAPView({ shap }: Props) {
               {isAttack ? 'Intrusion Detected' : 'Benign Traffic'}
             </p>
             <p className="text-gray-400 text-sm">
-              SHAP base value: {shap.base_value != null ? shap.base_value.toFixed(4) : '—'} · Prediction: {String(shap.prediction)}
+              SHAP base value: {shap.base_value != null ? shap.base_value.toFixed(4) : '—'} · Prediction:{' '}
+              {shap.prediction_label ?? String(shap.prediction)}
+              {shap.prediction_probability != null && ` (${(shap.prediction_probability * 100).toFixed(1)}%)`}
             </p>
           </div>
         </div>

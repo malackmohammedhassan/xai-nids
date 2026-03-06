@@ -184,14 +184,43 @@ export interface SHAPResult {
   shap_values: Record<string, number>;
   base_value: number;
   prediction: number | string;
+  /** "Attack" | "Normal" — human-readable prediction label */
+  prediction_label?: string;
+  /** Probability of the attack class (0–1) */
+  prediction_probability?: number;
+  /** { Normal: 0.13, Attack: 0.87 } */
+  class_probabilities?: Record<string, number>;
   waterfall_chart_b64?: string;
   summary_chart_b64?: string;
   // Raw fields also present
-  values?: Array<{ feature: string; value: number; shap_value: number }>;
+  values?: Array<{
+    feature: string;
+    value: number;
+    shap_value: number;
+    pct_contribution?: number;
+  }>;
+  /** Cumulative waterfall steps for interactive chart */
+  cumulative_waterfall?: Array<{
+    feature: string;
+    value: number;
+    shap_value: number;
+    start: number;
+    end: number;
+    pct_contribution: number;
+  }>;
   expected_value?: number;
   force_plot_base64?: string;
   summary_plot_base64?: string;
   sampled_for_performance?: boolean;
+}
+
+/** Parsed LIME feature condition with structured context */
+export interface LIMEFeatureDetail {
+  condition: string;
+  feature_name: string;
+  actual_value: number | null;
+  weight: number;
+  direction: 'toward_attack' | 'toward_normal';
 }
 
 export interface LIMEResult {
@@ -204,6 +233,14 @@ export interface LIMEResult {
   explanation?: Array<{ feature_condition: string; weight: number }>;
   prediction_probabilities?: Record<string, number>;
   local_fidelity?: number;
+  /** R² of local linear model (0–1, higher is better) */
+  fidelity_score?: number;
+  /** "Attack" | "Normal" */
+  prediction_label?: string;
+  /** { Normal: 0.13, Attack: 0.87 } */
+  class_probabilities?: Record<string, number>;
+  /** Rich parsed feature details */
+  feature_details?: LIMEFeatureDetail[];
   plot_base64?: string;
 }
 

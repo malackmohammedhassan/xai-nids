@@ -112,6 +112,17 @@ export default function ExplainabilityPage() {
 
   const confidence = useMemo(() => {
     if (!result) return null;
+    // Prefer the richer probability maps from new backend fields
+    if (result.lime?.class_probabilities) {
+      const vals = Object.values(result.lime.class_probabilities);
+      if (vals.length > 0) return Math.max(...vals);
+    }
+    if (result.shap?.class_probabilities) {
+      const vals = Object.values(result.shap.class_probabilities);
+      if (vals.length > 0) return Math.max(...vals);
+    }
+    // Fall back to legacy fields
+    if (result.shap?.prediction_probability != null) return result.shap.prediction_probability;
     if (result.lime?.prediction_proba && result.lime.prediction_proba.length > 0)
       return Math.max(...result.lime.prediction_proba);
     return null;
@@ -119,10 +130,19 @@ export default function ExplainabilityPage() {
 
   const prediction = useMemo(() => {
     if (!result) return '—';
+    // Prefer explicit label from new backend fields
+    if (result.shap?.prediction_label) return result.shap.prediction_label;
+    if (result.lime?.prediction_label) return result.lime.prediction_label;
+    // Legacy fallbacks
     if (result.shap?.prediction != null) return String(result.shap.prediction);
     const probs = result.lime?.prediction_probabilities;
     if (probs) {
       const best = Object.entries(probs).sort((a, b) => b[1] - a[1])[0];
+      return best ? best[0] : '—';
+    }
+    const classProbs = result.lime?.class_probabilities;
+    if (classProbs) {
+      const best = Object.entries(classProbs).sort((a, b) => b[1] - a[1])[0];
       return best ? best[0] : '—';
     }
     return '—';
@@ -345,7 +365,15 @@ export default function ExplainabilityPage() {
                           Feature contributions{result.shap.base_value != null ? ` (base: ${result.shap.base_value.toFixed(4)})` : ''}.
                           Red bars push toward Attack; cyan bars push toward Normal.
                         </p>
-                        <SHAPWaterfall shapValues={result.shap.shap_values} baseValue={result.shap.base_value} topN={20} />
+                        <SHAPWaterfall
+                          shapValues={result.shap.shap_values}
+                          baseValue={result.shap.base_value}
+                          cumulativeWaterfall={result.shap.cumulative_waterfall}
+                          featureDetails={result.shap.values}
+                          predictionLabel={result.shap.prediction_label}
+                          attackProbability={result.shap.class_probabilities?.Attack ?? result.shap.prediction_probability}
+                          topN={20}
+                        />
                         <HowItWorks title="How to read SHAP Waterfall" learnMoreUrl="https://shap.readthedocs.io/en/latest/">
                           <p>Each bar shows one feature’s contribution to moving the prediction from the
                           base value (average model output) to the final score. Longer bars = more impact.</p>
@@ -426,11 +454,7 @@ export default function ExplainabilityPage() {
                   {vizTab === 'lime' && (
                     result.lime?.feature_weights ? (
                       <div className="space-y-3">
-                        <p className="text-xs text-gray-500">
-                          Local linear model coefficients. Amber = pushes toward Attack; indigo = pushes toward Normal.
-                          {result.lime.local_fidelity != null && ` Local fidelity: ${(result.lime.local_fidelity * 100).toFixed(1)}%`}
-                        </p>
-                        <LIMEBarChart weights={result.lime.feature_weights} topN={15} />
+                        <LIMEBarChart lime={result.lime} topN={15} />
                         <HowItWorks title="How to read LIME Weights">
                           <p>LIME trains a simple linear model on perturbed samples near your input.
                           Positive weight (amber) = feature pushes toward Attack ·
