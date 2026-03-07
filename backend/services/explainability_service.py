@@ -37,7 +37,7 @@ import pandas as pd
 from core.config import get_settings
 from core.exceptions import ExplainabilityOOMError, ModelNotFoundError
 from core.logger import get_logger
-from services.model_registry import get_loaded_model
+from services.model_registry import get_loaded_model, load_model
 
 logger = get_logger("explainability_service")
 
@@ -76,6 +76,14 @@ def _build_background(feature_names: List[str], n_rows: int, bundle: dict) -> pd
 
 
 def _get_bundle(model_id: str) -> dict:
+    if get_loaded_model(model_id) is None:
+        try:
+            load_model(model_id)
+        except Exception as exc:
+            raise ModelNotFoundError(
+                f"Model {model_id} is not loaded and could not be loaded from disk",
+                model_id=model_id,
+            ) from exc
     bundle = get_loaded_model(model_id)
     if bundle is None:
         raise ModelNotFoundError(f"Model {model_id} is not loaded into memory", model_id=model_id)
