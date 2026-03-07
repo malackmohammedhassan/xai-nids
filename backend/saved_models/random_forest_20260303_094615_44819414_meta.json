@@ -34,7 +34,6 @@
     "dinpkt",
     "sjit",
     "djit",
-    "swin",
     "tcprtt",
     "synack",
     "ackdat",
@@ -42,8 +41,9 @@
     "dmean",
     "ct_srv_src",
     "ct_state_ttl",
-    "ct_dst_sport_ltm",
+    "ct_dst_ltm",
     "ct_dst_src_ltm",
+    "ct_src_ltm",
     "ct_srv_dst",
     "is_sm_ips_ports"
   ],
@@ -9898,5 +9898,6 @@
   },
   "pipeline_config": null,
   "cv_results": null,
-  "training_mode": "quick"
+  "training_mode": "quick",
+  "dataset_id": "c4c40d41-17f4-4d1e-8c14-54e0df0ac1e6"
 }

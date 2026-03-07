@@ -183,6 +183,9 @@ def _profile_model(model_id: str) -> dict:
         raw_X = bundle.get("X_train_sample")
         if raw_X is not None:
             X_sample = np.asarray(raw_X, dtype=float)
+        # Prefer bundle's feature_names so they always align with X_sample columns
+        if bundle.get("feature_names"):
+            feature_names = list(bundle["feature_names"])
 
     feature_stats = _compute_feature_stats(X_sample, feature_names) if X_sample is not None else {}
     top_correlations = _compute_top_correlations(X_sample, feature_names) if X_sample is not None else []
