@@ -8,3 +8,4 @@ export { explainabilityApi } from './explainability';
 export { experimentsApi } from './experiments';
 export { healthApi } from './health';
 export { validationApi } from './validation';
+export { labApi } from './lab';

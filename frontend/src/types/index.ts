@@ -253,6 +253,69 @@ export interface ExplanationResult {
   computation_time_ms: number;
 }
 
+// ─── Model Intelligence Lab Types ────────────────────────────────────────────
+export interface LabFeatureStat {
+  mean: number;
+  std: number;
+  min: number;
+  max: number;
+  skewness: number;
+  kurtosis: number;
+  q25: number;
+  q75: number;
+  count: number;
+}
+
+export interface LabTopCorrelation {
+  feature_a: string;
+  feature_b: string;
+  correlation: number;
+}
+
+export interface LabModelProfile {
+  model_id: string;
+  model_type: string;
+  dataset_id?: string;
+  dataset_filename?: string;
+  feature_names: string[];
+  class_names: string[];
+  hyperparameters: Record<string, unknown>;
+  created_at?: string;
+  feature_count: number;
+  is_loaded: boolean;
+  // Metrics
+  accuracy?: number;
+  precision?: number;
+  recall?: number;
+  f1_score?: number;
+  roc_auc?: number;
+  confusion_matrix?: number[][];
+  roc_curve?: { fpr: number[]; tpr: number[] };
+  classification_report?: Record<string, Record<string, number>>;
+  feature_importances?: Record<string, number>;
+  // Dataset stats
+  sample_size: number;
+  feature_stats: Record<string, LabFeatureStat>;
+  class_distribution?: Record<string, number>;
+  top_correlations?: LabTopCorrelation[];
+  feature_samples?: Record<string, number[]>;
+}
+
+export interface LabCompareResult {
+  model_a: LabModelProfile;
+  model_b: LabModelProfile;
+  shared_features: string[];
+  only_in_a: string[];
+  only_in_b: string[];
+  metric_deltas: {
+    accuracy?: number;
+    precision?: number;
+    recall?: number;
+    f1_score?: number;
+    roc_auc?: number;
+  };
+}
+
 // ─── Experiment Types ─────────────────────────────────────────────────────────
 export interface ExperimentRun {
   run_id: string;

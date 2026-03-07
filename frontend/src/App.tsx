@@ -20,7 +20,8 @@ const ExplainabilityPage = lazy(() => import('@/pages/ExplainabilityPage'));
 const PredictionPage     = lazy(() => import('@/pages/PredictionPage'));
 const ExperimentsPage    = lazy(() => import('@/pages/ExperimentsPage'));
 const MetricsPage        = lazy(() => import('@/pages/MetricsPage'));
-const ValidationPage     = lazy(() => import('@/pages/ValidationPage'));
+const ValidationPage          = lazy(() => import('@/pages/ValidationPage'));
+const ModelIntelligenceLabPage = lazy(() => import('@/pages/ModelIntelligenceLabPage'));
 
 function PageFallback() {
   return (
@@ -136,6 +137,14 @@ export default function App() {
             <Route
               path="tasks"
               element={<Navigate to="/" replace />}
+            />
+            <Route
+              path="lab"
+              element={
+                <Suspense fallback={<PageFallback />}>
+                  <ModelIntelligenceLabPage />
+                </Suspense>
+              }
             />
             {/* Legacy routes from old app */}
             <Route path="models" element={<Navigate to="/evaluation" replace />} />

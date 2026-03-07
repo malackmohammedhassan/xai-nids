@@ -1,0 +1,159 @@
+{
+  "viz_type": "mutual_info",
+  "dataset_id": "d0253792-8294-4a17-bb54-1e9c0ff5e0d4",
+  "target_column": "class",
+  "data": [
+    {
+      "feature": "src_bytes",
+      "mi_score": 0.5667
+    },
+    {
+      "feature": "dst_bytes",
+      "mi_score": 0.441
+    },
+    {
+      "feature": "same_srv_rate",
+      "mi_score": 0.3711
+    },
+    {
+      "feature": "diff_srv_rate",
+      "mi_score": 0.3614
+    },
+    {
+      "feature": "dst_host_srv_count",
+      "mi_score": 0.3369
+    },
+    {
+      "feature": "dst_host_same_srv_rate",
+      "mi_score": 0.314
+    },
+    {
+      "feature": "logged_in",
+      "mi_score": 0.2937
+    },
+    {
+      "feature": "dst_host_serror_rate",
+      "mi_score": 0.2877
+    },
+    {
+      "feature": "dst_host_diff_srv_rate",
+      "mi_score": 0.285
+    },
+    {
+      "feature": "dst_host_srv_serror_rate",
+      "mi_score": 0.2829
+    },
+    {
+      "feature": "serror_rate",
+      "mi_score": 0.2781
+    },
+    {
+      "feature": "srv_serror_rate",
+      "mi_score": 0.2714
+    },
+    {
+      "feature": "count",
+      "mi_score": 0.2654
+    },
+    {
+      "feature": "dst_host_srv_diff_host_rate",
+      "mi_score": 0.1858
+    },
+    {
+      "feature": "dst_host_count",
+      "mi_score": 0.1459
+    },
+    {
+      "feature": "dst_host_same_src_port_rate",
+      "mi_score": 0.1313
+    },
+    {
+      "feature": "srv_diff_host_rate",
+      "mi_score": 0.0991
+    },
+    {
+      "feature": "srv_count",
+      "mi_score": 0.0644
+    },
+    {
+      "feature": "dst_host_srv_rerror_rate",
+      "mi_score": 0.0625
+    },
+    {
+      "feature": "rerror_rate",
+      "mi_score": 0.0408
+    },
+    {
+      "feature": "dst_host_rerror_rate",
+      "mi_score": 0.039
+    },
+    {
+      "feature": "srv_rerror_rate",
+      "mi_score": 0.0357
+    },
+    {
+      "feature": "duration",
+      "mi_score": 0.0262
+    },
+    {
+      "feature": "hot",
+      "mi_score": 0.0086
+    },
+    {
+      "feature": "wrong_fragment",
+      "mi_score": 0.0077
+    },
+    {
+      "feature": "num_compromised",
+      "mi_score": 0.0041
+    },
+    {
+      "feature": "num_file_creations",
+      "mi_score": 0.0032
+    },
+    {
+      "feature": "land",
+      "mi_score": 0.0027
+    },
+    {
+      "feature": "su_attempted",
+      "mi_score": 0.0014
+    },
+    {
+      "feature": "num_root",
+      "mi_score": 0.0014
+    },
+    {
+      "feature": "num_access_files",
+      "mi_score": 0.0004
+    },
+    {
+      "feature": "num_failed_logins",
+      "mi_score": 0.0003
+    },
+    {
+      "feature": "is_guest_login",
+      "mi_score": 0.0003
+    },
+    {
+      "feature": "urgent",
+      "mi_score": 0.0
+    },
+    {
+      "feature": "root_shell",
+      "mi_score": 0.0
+    },
+    {
+      "feature": "num_shells",
+      "mi_score": 0.0
+    },
+    {
+      "feature": "num_outbound_cmds",
+      "mi_score": 0.0
+    },
+    {
+      "feature": "is_host_login",
+      "mi_score": 0.0
+    }
+  ]
+}

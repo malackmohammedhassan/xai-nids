@@ -9,6 +9,7 @@ import {
   Target,
   FlaskConical,
   ShieldCheck,
+  Microscope,
   ChevronLeft,
   ChevronRight,
   CheckCircle2,
@@ -33,6 +34,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/explainability',label: 'Explainability', icon: Lightbulb,      step: 4 },
   { to: '/prediction',    label: 'Prediction',     icon: Target,         step: 5 },
   { to: '/experiments',   label: 'Experiments',    icon: FlaskConical },
+  { to: '/lab',           label: 'Intelligence Lab', icon: Microscope },
   { to: '/validation',    label: 'Validation',     icon: ShieldCheck },
 ];
 

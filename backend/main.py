@@ -14,6 +14,7 @@ from core.middleware import RequestTimingMiddleware
 from routers import health, datasets, training, models, prediction, explainability, experiments
 from routers import intelligence, visualizations, jobs as jobs_router, session as session_router
 from routers import system as system_router, validation as validation_router
+from routers import lab as lab_router
 
 logger = get_logger("main")
 
@@ -67,6 +68,7 @@ def create_app() -> FastAPI:
     app.include_router(jobs_router.router, prefix=prefix_v2, tags=["Jobs"])
     app.include_router(session_router.router, prefix=prefix_v2, tags=["Session"])
     app.include_router(system_router.router, prefix=prefix_v2, tags=["System"])
+    app.include_router(lab_router.router, prefix=prefix_v2, tags=["Lab"])
 
     # ── Startup events ────────────────────────────────────────────────────────
     @app.on_event("startup")
