@@ -158,10 +158,14 @@ def _profile_model(model_id: str) -> dict:
     if not meta:
         raise HTTPException(status_code=404, detail=f"Model {model_id!r} not found.")
 
-    raw_metrics: dict = get_model_metrics(model_id) or {}
+    # full_metrics = {"metrics": {accuracy,precision,...}, "confusion_matrix": ...,
+    #                 "roc_curve": ..., "classification_report": ..., "feature_importance": [...]}
+    full_metrics: dict = get_model_metrics(model_id) or {}
+    # Scalar metrics nested under "metrics" sub-key; fall back to top-level meta fields
+    perf: dict = full_metrics.get("metrics") or {}
+
     class_names: list[str] = (
         meta.get("class_names")
-        or raw_metrics.get("class_names")
         or ["Normal", "Attack"]
     )
     feature_names: list[str] = meta.get("feature_names") or []
@@ -177,7 +181,7 @@ def _profile_model(model_id: str) -> dict:
     top_correlations = _compute_top_correlations(X_sample, feature_names) if X_sample is not None else []
     feature_samples = _compute_feature_samples(X_sample, feature_names) if X_sample is not None else {}
     class_distribution = _class_dist_from_report(
-        raw_metrics.get("classification_report"), class_names
+        full_metrics.get("classification_report"), class_names
     )
 
     return {
@@ -191,17 +195,17 @@ def _profile_model(model_id: str) -> dict:
         "created_at": meta.get("created_at"),
         "feature_count": meta.get("feature_count") or len(feature_names),
         "is_loaded": bundle is not None,
-        # Metrics
-        "accuracy": _safe(raw_metrics.get("accuracy")),
-        "precision": _safe(raw_metrics.get("precision")),
-        "recall": _safe(raw_metrics.get("recall")),
-        "f1_score": _safe(raw_metrics.get("f1_score")),
-        "roc_auc": _safe(raw_metrics.get("roc_auc")),
-        "confusion_matrix": raw_metrics.get("confusion_matrix"),
-        "roc_curve": _normalise_roc(raw_metrics.get("roc_curve")),
-        "classification_report": raw_metrics.get("classification_report"),
+        # Metrics — from perf sub-dict, with top-level meta as fallback
+        "accuracy":  _safe(perf.get("accuracy")  or meta.get("accuracy")),
+        "precision": _safe(perf.get("precision") or meta.get("precision")),
+        "recall":    _safe(perf.get("recall")    or meta.get("recall")),
+        "f1_score":  _safe(perf.get("f1_score")  or meta.get("f1_score")),
+        "roc_auc":   _safe(perf.get("roc_auc")   or meta.get("roc_auc")),
+        "confusion_matrix": full_metrics.get("confusion_matrix"),
+        "roc_curve": _normalise_roc(full_metrics.get("roc_curve")),
+        "classification_report": full_metrics.get("classification_report"),
         "feature_importances": _normalise_importances(
-            raw_metrics.get("feature_importances") or raw_metrics.get("feature_importance")
+            full_metrics.get("feature_importances") or full_metrics.get("feature_importance")
         ),
         # Dataset / training-sample stats
         "sample_size": int(len(X_sample)) if X_sample is not None else 0,
