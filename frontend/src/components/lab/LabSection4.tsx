@@ -10,6 +10,10 @@ import type { LabModelProfile, ExplanationResult, DatasetListItem } from '@/type
 interface Props {
   a: LabModelProfile;
   b: LabModelProfile;
+  /** Explicit dataset IDs resolved from model metadata at the page level.
+   *  Takes priority over a.dataset_id / b.dataset_id from the lab profile. */
+  datasetAId?: string;
+  datasetBId?: string;
   datasets?: DatasetListItem[];
 }
 
@@ -27,7 +31,7 @@ function VerdictBadge({ result, color }: { result: ExplanationResult | null; col
   );
 }
 
-export function LabSection4({ a, b, datasets = [] }: Props) {
+export function LabSection4({ a, b, datasetAId, datasetBId, datasets = [] }: Props) {
   const [xaiMethod, setXaiMethod] = useState<'shap' | 'lime' | 'both'>('both');
   const [displayTopN, setDisplayTopN] = useState(10);
   const [featureValues, setFeatureValues] = useState<Record<string, string>>({});
@@ -106,23 +110,23 @@ export function LabSection4({ a, b, datasets = [] }: Props) {
           Enter values. Features only in Model A are passed to A; only in B to B. Shared features go to both.
         </p>
 
-        {/* Auto-fill from dataset — two independent samplers, one per model */}
+        {/* Auto-fill from dataset — one row-sampler per model, dataset resolved from model metadata */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
           <div className="space-y-1">
-            <p className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wide pl-0.5">Auto-fill from Model A dataset</p>
+            <p className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wide pl-0.5">Load sample row — Model A dataset</p>
             <DatasetRowSampler
-              datasetId={a.dataset_id}
+              datasetId={datasetAId ?? a.dataset_id}
               featureNames={a.feature_names}
-              datasets={datasets}
+              datasets={datasetAId || a.dataset_id ? [] : datasets}
               onLoad={(vals) => setFeatureValues((prev) => ({ ...prev, ...vals }))}
             />
           </div>
           <div className="space-y-1">
-            <p className="text-[10px] font-semibold text-orange-400 uppercase tracking-wide pl-0.5">Auto-fill from Model B dataset</p>
+            <p className="text-[10px] font-semibold text-orange-400 uppercase tracking-wide pl-0.5">Load sample row — Model B dataset</p>
             <DatasetRowSampler
-              datasetId={b.dataset_id}
+              datasetId={datasetBId ?? b.dataset_id}
               featureNames={b.feature_names}
-              datasets={datasets}
+              datasets={datasetBId || b.dataset_id ? [] : datasets}
               onLoad={(vals) => setFeatureValues((prev) => ({ ...prev, ...vals }))}
             />
           </div>

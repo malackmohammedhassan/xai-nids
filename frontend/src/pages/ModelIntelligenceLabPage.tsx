@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   FlaskConical, Loader2, AlertCircle, RefreshCw, ChevronRight,
 } from 'lucide-react';
@@ -16,6 +16,7 @@ import { LabSection3 } from '@/components/lab/LabSection3';
 import { LabSection4 } from '@/components/lab/LabSection4';
 import { LabSection5 } from '@/components/lab/LabSection5';
 import type { LabCompareResult } from '@/types';
+import { Database } from 'lucide-react';
 
 type SectionId = 's1' | 's2' | 's3' | 's4' | 's5';
 const SECTIONS: Array<{ id: SectionId; label: string; sublabel: string }> = [
@@ -35,6 +36,15 @@ export default function ModelIntelligenceLabPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<SectionId>('s1');
+
+  // Derive dataset info from model metadata — available as soon as a model is selected,
+  // before Run Analysis is clicked. Prefer lab result (most accurate) then fall back to meta.
+  const metaA = useMemo(() => models.find((m) => m.model_id === modelAId), [models, modelAId]);
+  const metaB = useMemo(() => models.find((m) => m.model_id === modelBId), [models, modelBId]);
+  const dsAId   = data?.model_a?.dataset_id       ?? metaA?.dataset_id;
+  const dsBId   = data?.model_b?.dataset_id       ?? metaB?.dataset_id;
+  const dsAName = data?.model_a?.dataset_filename ?? metaA?.dataset_filename;
+  const dsBName = data?.model_b?.dataset_filename ?? metaB?.dataset_filename;
 
   useEffect(() => { fetchList(); fetchDatasets(); }, [fetchList, fetchDatasets]);
 
@@ -89,9 +99,10 @@ export default function ModelIntelligenceLabPage() {
               onChange={(id) => { setModelAId(id); setError(null); setData(null); }}
               placeholder="Select Model A…"
             />
-            {modelAId && data?.model_a && (
-              <p className="text-[10px] text-gray-500 font-mono truncate">
-                {data.model_a.dataset_filename ?? data.model_a.dataset_id ?? 'Unknown dataset'}
+            {modelAId && (
+              <p className="text-[10px] text-gray-500 font-mono truncate flex items-center gap-1" title={dsAName ?? dsAId ?? ''}>
+                <Database size={9} className="shrink-0 text-indigo-400" />
+                {dsAName ?? dsAId ?? 'Dataset not linked'}
               </p>
             )}
           </div>
@@ -110,9 +121,10 @@ export default function ModelIntelligenceLabPage() {
               onChange={(id) => { setModelBId(id); setError(null); setData(null); }}
               placeholder="Select Model B…"
             />
-            {modelBId && data?.model_b && (
-              <p className="text-[10px] text-gray-500 font-mono truncate">
-                {data.model_b.dataset_filename ?? data.model_b.dataset_id ?? 'Unknown dataset'}
+            {modelBId && (
+              <p className="text-[10px] text-gray-500 font-mono truncate flex items-center gap-1" title={dsBName ?? dsBId ?? ''}>
+                <Database size={9} className="shrink-0 text-orange-400" />
+                {dsBName ?? dsBId ?? 'Dataset not linked'}
               </p>
             )}
           </div>
@@ -212,7 +224,7 @@ export default function ModelIntelligenceLabPage() {
               <LabSection3 a={data.model_a} b={data.model_b} deltas={data.metric_deltas} />
             )}
             {activeSection === 's4' && (
-              <LabSection4 a={data.model_a} b={data.model_b} datasets={datasets} />
+              <LabSection4 a={data.model_a} b={data.model_b} datasetAId={dsAId} datasetBId={dsBId} datasets={datasets} />
             )}
             {activeSection === 's5' && (
               <LabSection5 a={data.model_a} b={data.model_b} />
