@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   FlaskConical, Loader2, AlertCircle, RefreshCw, ChevronRight,
 } from 'lucide-react';
@@ -33,8 +33,6 @@ export default function ModelIntelligenceLabPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<SectionId>('s1');
-  const sectionRefs = useRef<Partial<Record<SectionId, HTMLDivElement | null>>>({});
-  const stickyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { fetchList(); }, [fetchList]);
 
@@ -59,15 +57,6 @@ export default function ModelIntelligenceLabPage() {
       setLoading(false);
     }
   }, [modelAId, modelBId]);
-
-  const scrollTo = (id: SectionId) => {
-    setActiveSection(id);
-    const el = sectionRefs.current[id];
-    if (!el) return;
-    const offset = (stickyRef.current?.clientHeight ?? 48) + 16;
-    const top = el.getBoundingClientRect().top + window.scrollY - offset;
-    window.scrollTo({ top, behavior: 'smooth' });
-  };
 
   return (
     <div className="space-y-6 max-w-7xl pb-20">
@@ -181,17 +170,14 @@ export default function ModelIntelligenceLabPage() {
       {/* Results */}
       {data && !loading && (
         <>
-          {/* Sticky section navigator */}
-          <div
-            ref={stickyRef}
-            className="sticky top-0 z-20 bg-gray-900/95 backdrop-blur border border-gray-700 rounded-xl overflow-x-auto"
-          >
+          {/* Section tab bar */}
+          <div className="rounded-xl border border-gray-700 bg-gray-900 overflow-x-auto">
             <div className="flex">
               {SECTIONS.map((s) => (
                 <button
                   key={s.id}
-                  onClick={() => scrollTo(s.id)}
-                  className={`flex-1 min-w-[120px] px-3 py-2.5 text-left transition-colors border-b-2 -mb-px ${
+                  onClick={() => setActiveSection(s.id)}
+                  className={`flex-1 min-w-[130px] px-3 py-2.5 text-left transition-colors border-b-2 -mb-px ${
                     activeSection === s.id
                       ? 'border-violet-500 bg-violet-500/5'
                       : 'border-transparent hover:bg-gray-800/60'
@@ -206,40 +192,29 @@ export default function ModelIntelligenceLabPage() {
             </div>
           </div>
 
-          {/* Section 1 */}
-          <div ref={(el) => { sectionRefs.current.s1 = el; }} className="space-y-3">
-            <SectionHeading id="s1" title="Dataset Structure Analysis" onVisible={() => setActiveSection('s1')} />
-            <LabSection1
-              a={data.model_a}
-              b={data.model_b}
-              sharedFeatures={data.shared_features}
-              onlyA={data.only_in_a}
-              onlyB={data.only_in_b}
-            />
-          </div>
-
-          {/* Section 2 */}
-          <div ref={(el) => { sectionRefs.current.s2 = el; }} className="space-y-3">
-            <SectionHeading id="s2" title="Dataset Distribution Analysis" onVisible={() => setActiveSection('s2')} />
-            <LabSection2 a={data.model_a} b={data.model_b} sharedFeatures={data.shared_features} />
-          </div>
-
-          {/* Section 3 */}
-          <div ref={(el) => { sectionRefs.current.s3 = el; }} className="space-y-3">
-            <SectionHeading id="s3" title="Model Performance Comparison" onVisible={() => setActiveSection('s3')} />
-            <LabSection3 a={data.model_a} b={data.model_b} deltas={data.metric_deltas} />
-          </div>
-
-          {/* Section 4 */}
-          <div ref={(el) => { sectionRefs.current.s4 = el; }} className="space-y-3">
-            <SectionHeading id="s4" title="Explainability Comparison" onVisible={() => setActiveSection('s4')} />
-            <LabSection4 a={data.model_a} b={data.model_b} />
-          </div>
-
-          {/* Section 5 */}
-          <div ref={(el) => { sectionRefs.current.s5 = el; }} className="space-y-3">
-            <SectionHeading id="s5" title="Training Pipeline Analysis" onVisible={() => setActiveSection('s5')} />
-            <LabSection5 a={data.model_a} b={data.model_b} />
+          {/* Active section content */}
+          <div className="mt-2">
+            {activeSection === 's1' && (
+              <LabSection1
+                a={data.model_a}
+                b={data.model_b}
+                sharedFeatures={data.shared_features}
+                onlyA={data.only_in_a}
+                onlyB={data.only_in_b}
+              />
+            )}
+            {activeSection === 's2' && (
+              <LabSection2 a={data.model_a} b={data.model_b} sharedFeatures={data.shared_features} />
+            )}
+            {activeSection === 's3' && (
+              <LabSection3 a={data.model_a} b={data.model_b} deltas={data.metric_deltas} />
+            )}
+            {activeSection === 's4' && (
+              <LabSection4 a={data.model_a} b={data.model_b} />
+            )}
+            {activeSection === 's5' && (
+              <LabSection5 a={data.model_a} b={data.model_b} />
+            )}
           </div>
         </>
       )}
@@ -254,16 +229,6 @@ export default function ModelIntelligenceLabPage() {
           </p>
         </div>
       )}
-    </div>
-  );
-}
-
-function SectionHeading({ id, title, onVisible }: { id: string; title: string; onVisible: () => void }) {
-  return (
-    <div className="flex items-center gap-3 pt-2">
-      <span className="flex-1 h-px bg-gray-700/60" />
-      <h2 className="text-base font-bold text-gray-200 whitespace-nowrap px-2">{title}</h2>
-      <span className="flex-1 h-px bg-gray-700/60" />
     </div>
   );
 }

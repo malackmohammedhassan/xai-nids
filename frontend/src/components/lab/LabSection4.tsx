@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { explainabilityApi } from '@/api';
 import { SHAPWaterfall } from '@/components/explainability/SHAPWaterfall';
 import { LIMEBarChart } from '@/components/explainability/LIMEBarChart';
+import { DatasetRowSampler } from '@/components/common/DatasetRowSampler';
 import type { LabModelProfile, ExplanationResult } from '@/types';
 
 interface Props {
@@ -103,6 +104,27 @@ export function LabSection4({ a, b }: Props) {
         <p className="text-xs text-gray-600">
           Enter values. Features only in Model A are passed to A; only in B to B. Shared features go to both.
         </p>
+
+        {/* Auto-fill from dataset — two independent samplers, one per model */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+          <div className="space-y-1">
+            <p className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wide pl-0.5">Auto-fill from Model A dataset</p>
+            <DatasetRowSampler
+              datasetId={a.dataset_id}
+              featureNames={a.feature_names}
+              onLoad={(vals) => setFeatureValues((prev) => ({ ...prev, ...vals }))}
+            />
+          </div>
+          <div className="space-y-1">
+            <p className="text-[10px] font-semibold text-orange-400 uppercase tracking-wide pl-0.5">Auto-fill from Model B dataset</p>
+            <DatasetRowSampler
+              datasetId={b.dataset_id}
+              featureNames={b.feature_names}
+              onLoad={(vals) => setFeatureValues((prev) => ({ ...prev, ...vals }))}
+            />
+          </div>
+        </div>
+
         {!collapsed && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-56 overflow-y-auto pr-1">
             {allFeatures.map((f) => {

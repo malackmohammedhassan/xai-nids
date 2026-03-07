@@ -30,25 +30,25 @@ function MetricDeltaCard({
   const pctA = valA != null ? `${(valA * 100).toFixed(2)}%` : '—';
   const pctB = valB != null ? `${(valB * 100).toFixed(2)}%` : '—';
   return (
-    <div className="rounded-xl border border-gray-700 bg-gray-800/60 p-4 space-y-2">
-      <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">{label}</p>
-      <div className="flex items-center justify-between gap-2">
-        <div className="text-center flex-1">
-          <p className="text-xs text-indigo-400">Model A</p>
-          <p className="text-xl font-bold text-indigo-300">{pctA}</p>
+    <div className="rounded-xl border border-gray-700 bg-gray-800/60 p-3 space-y-2 min-w-0">
+      <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide truncate">{label}</p>
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5">
+        <div className="min-w-0">
+          <p className="text-[10px] text-indigo-400 mb-0.5">Model A</p>
+          <p className="text-sm font-bold text-indigo-300 tabular-nums">{pctA}</p>
         </div>
-        {delta != null && (
-          <div className={`text-center px-2 py-1 rounded-lg text-sm font-bold ${better ? 'bg-emerald-500/10 text-emerald-400' : better === false ? 'bg-red-500/10 text-red-400' : 'bg-gray-700 text-gray-400'}`}>
+        {delta != null ? (
+          <div className={`shrink-0 text-center px-1.5 py-0.5 rounded text-[10px] font-bold ${better ? 'bg-emerald-500/10 text-emerald-400' : better === false ? 'bg-red-500/10 text-red-400' : 'bg-gray-700 text-gray-400'}`}>
             {delta > 0 ? '+' : ''}{(delta * 100).toFixed(2)}%
           </div>
-        )}
-        <div className="text-center flex-1">
-          <p className="text-xs text-orange-400">Model B</p>
-          <p className="text-xl font-bold text-orange-300">{pctB}</p>
+        ) : <div />}
+        <div className="min-w-0 text-right">
+          <p className="text-[10px] text-orange-400 mb-0.5">Model B</p>
+          <p className="text-sm font-bold text-orange-300 tabular-nums">{pctB}</p>
         </div>
       </div>
       {delta != null && (
-        <p className="text-[10px] text-center text-gray-600">
+        <p className="text-[10px] text-gray-600 truncate">
           {better ? 'Model B is better ↑' : better === false ? 'Model A is better ↑' : 'Equal performance'}
         </p>
       )}
