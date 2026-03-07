@@ -49,9 +49,12 @@ export default function ModelIntelligenceLabPage() {
       setData(result);
       setActiveSection('s1');
     } catch (err: unknown) {
-      const msg = isAppError(err) ? err.message : (err as Error).message ?? 'Compare failed';
+      let msg = isAppError(err) ? err.message : (err as Error).message ?? 'Compare failed';
+      // Disambiguate a generic "Not Found" into something actionable
+      if (msg.toLowerCase() === 'not found' || msg === '404') {
+        msg = 'Backend returned 404 — the server may have restarted. Refresh the page and try again.';
+      }
       setError(msg);
-      toast.error(msg);
     } finally {
       setLoading(false);
     }
