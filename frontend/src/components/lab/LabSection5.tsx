@@ -11,16 +11,16 @@ const B_COLOR = 'text-orange-300';
 
 function PipelineCard({ label, valA, valB }: { label: string; valA: string; valB: string }) {
   return (
-    <div className="rounded-xl border border-gray-700 bg-gray-800/60 p-4 space-y-2">
-      <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">{label}</p>
-      <div className="flex items-center justify-between gap-2 text-sm">
-        <div>
-          <span className="text-[10px] text-indigo-400 mr-1">A</span>
-          <span className={`font-semibold ${A_COLOR}`}>{valA || '—'}</span>
+    <div className="rounded-xl border border-gray-700 bg-gray-800/60 p-4 space-y-2 min-w-0">
+      <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wide truncate">{label}</p>
+      <div className="space-y-1.5">
+        <div className="flex items-baseline gap-1.5 min-w-0">
+          <span className="text-[10px] font-bold text-indigo-400 shrink-0">A</span>
+          <span className={`text-sm font-semibold ${A_COLOR} truncate min-w-0`} title={valA || '—'}>{valA || '—'}</span>
         </div>
-        <div className="text-right">
-          <span className="text-[10px] text-orange-400 mr-1">B</span>
-          <span className={`font-semibold ${B_COLOR}`}>{valB || '—'}</span>
+        <div className="flex items-baseline gap-1.5 min-w-0">
+          <span className="text-[10px] font-bold text-orange-400 shrink-0">B</span>
+          <span className={`text-sm font-semibold ${B_COLOR} truncate min-w-0`} title={valB || '—'}>{valB || '—'}</span>
         </div>
       </div>
     </div>
