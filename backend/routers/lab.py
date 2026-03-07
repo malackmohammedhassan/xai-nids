@@ -15,7 +15,7 @@ import pandas as pd
 from fastapi import APIRouter, HTTPException
 
 from core.logger import get_logger
-from services.model_registry import get_loaded_model, get_model_meta, get_model_metrics
+from services.model_registry import get_loaded_model, get_model_meta, get_model_metrics, load_model
 
 router = APIRouter(prefix="/lab", tags=["Lab"])
 logger = get_logger("lab")
@@ -169,6 +169,13 @@ def _profile_model(model_id: str) -> dict:
         or ["Normal", "Attack"]
     )
     feature_names: list[str] = meta.get("feature_names") or []
+
+    # Ensure the model bundle is in memory so X_train_sample is always available
+    if get_loaded_model(model_id) is None:
+        try:
+            load_model(model_id)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Lab: could not load bundle for %s: %s", model_id, exc)
 
     bundle = get_loaded_model(model_id)
     X_sample: Optional[np.ndarray] = None
