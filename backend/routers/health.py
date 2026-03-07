@@ -37,8 +37,8 @@ async def health() -> dict:
     is_training = manager.state.task_id is not None and manager.state.status in ("RUNNING", "PENDING")
 
     return {
-        # Core fields — frontend and health-check framework expect these
-        "status": "healthy",
+        # Core fields — frontend HealthStatus type expects 'ok' | 'degraded' | 'error'
+        "status": "ok",
         "version": settings.app_version,
         "uptime": round(time.time() - _start_time, 1),  # short alias used by liveness dashboards
         "backend_ready": True,

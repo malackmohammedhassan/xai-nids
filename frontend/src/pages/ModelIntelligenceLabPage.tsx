@@ -95,7 +95,7 @@ export default function ModelIntelligenceLabPage() {
             <ModelSelect
               models={models}
               value={modelAId}
-              onChange={setModelAId}
+              onChange={(id) => { setModelAId(id); setError(null); setData(null); }}
               placeholder="Select Model A…"
             />
             {modelAId && data?.model_a && (
@@ -116,7 +116,7 @@ export default function ModelIntelligenceLabPage() {
             <ModelSelect
               models={models}
               value={modelBId}
-              onChange={setModelBId}
+              onChange={(id) => { setModelBId(id); setError(null); setData(null); }}
               placeholder="Select Model B…"
             />
             {modelBId && data?.model_b && (
