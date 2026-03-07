@@ -9,6 +9,7 @@ import { GlobalTaskBar } from '@/components/tasks/GlobalTaskBar';
 import { useJobWebSocket } from '@/hooks/useJobWebSocket';
 import { useSession } from '@/hooks/useSession';
 import { usePersistedStore } from '@/hooks/usePersistedStore';
+import { useAutoLoad } from '@/hooks/useAutoLoad';
 import { FEATURES } from '@/utils/features';
 
 // Lazy-load pages for code splitting
@@ -40,11 +41,12 @@ function NotFound() {
   );
 }
 
-/** Initialise global hooks (WS, session, persistence) once at app root */
+/** Initialise global hooks (WS, session, persistence, auto-load) once at app root */
 function AppInit() {
   useJobWebSocket();
   useSession(); // loads from server on mount
   usePersistedStore(); // restores + auto-saves selected ids, recent jobs
+  useAutoLoad(); // auto-loads all saved models + datasets into memory on startup
   return null;
 }
 

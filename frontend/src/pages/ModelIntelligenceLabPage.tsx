@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { labApi } from '@/api/lab';
 import { isAppError } from '@/api/client';
 import { useModels } from '@/hooks/useModels';
+import { useDatasets } from '@/hooks/useDatasets';
 import { ModelSelect } from '@/components/common/ModelSelect';
 import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
 import { ExportButton } from '@/components/common/ExportButton';
@@ -27,6 +28,7 @@ const SECTIONS: Array<{ id: SectionId; label: string; sublabel: string }> = [
 
 export default function ModelIntelligenceLabPage() {
   const { models, fetchList } = useModels();
+  const { datasets, fetchList: fetchDatasets } = useDatasets();
   const [modelAId, setModelAId] = useState<string>('');
   const [modelBId, setModelBId] = useState<string>('');
   const [data, setData] = useState<LabCompareResult | null>(null);
@@ -34,7 +36,7 @@ export default function ModelIntelligenceLabPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<SectionId>('s1');
 
-  useEffect(() => { fetchList(); }, [fetchList]);
+  useEffect(() => { fetchList(); fetchDatasets(); }, [fetchList, fetchDatasets]);
 
   const handleCompare = useCallback(async () => {
     if (!modelAId || !modelBId) { toast.error('Select both models first.'); return; }
@@ -210,7 +212,7 @@ export default function ModelIntelligenceLabPage() {
               <LabSection3 a={data.model_a} b={data.model_b} deltas={data.metric_deltas} />
             )}
             {activeSection === 's4' && (
-              <LabSection4 a={data.model_a} b={data.model_b} />
+              <LabSection4 a={data.model_a} b={data.model_b} datasets={datasets} />
             )}
             {activeSection === 's5' && (
               <LabSection5 a={data.model_a} b={data.model_b} />

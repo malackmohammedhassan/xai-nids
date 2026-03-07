@@ -5,11 +5,12 @@ import { explainabilityApi } from '@/api';
 import { SHAPWaterfall } from '@/components/explainability/SHAPWaterfall';
 import { LIMEBarChart } from '@/components/explainability/LIMEBarChart';
 import { DatasetRowSampler } from '@/components/common/DatasetRowSampler';
-import type { LabModelProfile, ExplanationResult } from '@/types';
+import type { LabModelProfile, ExplanationResult, DatasetListItem } from '@/types';
 
 interface Props {
   a: LabModelProfile;
   b: LabModelProfile;
+  datasets?: DatasetListItem[];
 }
 
 const A_COLOR = '#818cf8';
@@ -26,7 +27,7 @@ function VerdictBadge({ result, color }: { result: ExplanationResult | null; col
   );
 }
 
-export function LabSection4({ a, b }: Props) {
+export function LabSection4({ a, b, datasets = [] }: Props) {
   const [xaiMethod, setXaiMethod] = useState<'shap' | 'lime' | 'both'>('both');
   const [displayTopN, setDisplayTopN] = useState(10);
   const [featureValues, setFeatureValues] = useState<Record<string, string>>({});
@@ -112,6 +113,7 @@ export function LabSection4({ a, b }: Props) {
             <DatasetRowSampler
               datasetId={a.dataset_id}
               featureNames={a.feature_names}
+              datasets={datasets}
               onLoad={(vals) => setFeatureValues((prev) => ({ ...prev, ...vals }))}
             />
           </div>
@@ -120,6 +122,7 @@ export function LabSection4({ a, b }: Props) {
             <DatasetRowSampler
               datasetId={b.dataset_id}
               featureNames={b.feature_names}
+              datasets={datasets}
               onLoad={(vals) => setFeatureValues((prev) => ({ ...prev, ...vals }))}
             />
           </div>
